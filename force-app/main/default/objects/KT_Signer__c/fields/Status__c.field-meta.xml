@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Status__c</fullName>
+    <description>Individual signer lifecycle status.</description>
+    <label>Status</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>Pending</fullName><default>true</default><label>Pending</label></value>
+            <value><fullName>Invitation Sent</fullName><default>false</default><label>Invitation Sent</label></value>
+            <value><fullName>Viewed</fullName><default>false</default><label>Viewed</label></value>
+            <value><fullName>Signed</fullName><default>false</default><label>Signed</label></value>
+            <value><fullName>Declined</fullName><default>false</default><label>Declined</label></value>
+            <value><fullName>Delegated</fullName><default>false</default><label>Delegated</label></value>
+            <value><fullName>Expired</fullName><default>false</default><label>Expired</label></value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

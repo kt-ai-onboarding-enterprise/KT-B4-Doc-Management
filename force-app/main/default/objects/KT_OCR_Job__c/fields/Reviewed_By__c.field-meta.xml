@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Reviewed_By__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>HR Admin who accepted or rejected the OCR extraction.</description>
+    <label>Reviewed By</label>
+    <referenceTo>User</referenceTo>
+    <relationshipLabel>Reviewed OCR Jobs</relationshipLabel>
+    <relationshipName>ReviewedOCRJobs</relationshipName>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <type>Lookup</type>
+</CustomField>

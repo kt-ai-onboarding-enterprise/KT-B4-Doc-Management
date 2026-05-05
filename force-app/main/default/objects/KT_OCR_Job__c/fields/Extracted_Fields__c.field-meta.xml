@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Extracted_Fields__c</fullName>
+    <description>Structured key-value pairs after mapping through KT_OCR_FieldMapping__mdt.</description>
+    <label>Extracted Fields</label>
+    <length>32768</length>
+    <trackHistory>false</trackHistory>
+    <type>LongTextArea</type>
+    <visibleLines>10</visibleLines>
+</CustomField>

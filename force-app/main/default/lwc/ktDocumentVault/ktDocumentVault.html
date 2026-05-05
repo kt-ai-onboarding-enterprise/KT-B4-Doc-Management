@@ -1,0 +1,126 @@
+<template>
+    <lightning-card title="Document Vault" icon-name="standard:file">
+        <div class="vault-shell">
+            <div class="toolbar">
+                <div class="toolbar__count">{documentCount} documents</div>
+                <lightning-button-icon
+                    icon-name="utility:refresh"
+                    variant="border-filled"
+                    alternative-text="Refresh"
+                    title="Refresh"
+                    onclick={handleRefresh}>
+                </lightning-button-icon>
+            </div>
+
+            <template if:true={errorMessage}>
+                <div class="error-message" role="alert">{errorMessage}</div>
+            </template>
+
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading vault" size="small"></lightning-spinner>
+            </template>
+
+            <template if:true={hasSections}>
+                <template for:each={sections} for:item="section">
+                    <section key={section.type} class="vault-section">
+                        <button class="section-header" data-type={section.type} onclick={toggleSection}>
+                            <lightning-icon icon-name={section.iconName} size="x-small"></lightning-icon>
+                            <span>{section.type}</span>
+                            <span class="section-header__count">{section.count}</span>
+                        </button>
+
+                        <template if:true={section.expanded}>
+                            <div class="document-grid">
+                                <template for:each={section.entries} for:item="entry">
+                                    <article key={entry.id} class="document-card">
+                                        <div class="document-card__header">
+                                            <div class="document-title">{entry.documentName}</div>
+                                            <span class={entry.statusClass}>{entry.status}</span>
+                                        </div>
+                                        <dl class="metadata">
+                                            <div>
+                                                <dt>Signature</dt>
+                                                <dd>{entry.signatureStatus}</dd>
+                                            </div>
+                                            <div>
+                                                <dt>OCR</dt>
+                                                <dd>{entry.ocrStatus}</dd>
+                                            </div>
+                                            <div>
+                                                <dt>Version</dt>
+                                                <dd>{entry.versionNumber}</dd>
+                                            </div>
+                                            <div>
+                                                <dt>Expiry</dt>
+                                                <dd>{entry.expiryLabel}</dd>
+                                            </div>
+                                        </dl>
+                                        <div class="quick-actions">
+                                            <lightning-button-icon icon-name="utility:preview" variant="border-filled" alternative-text="Preview" title="Preview" data-id={entry.id} onclick={handlePreview}></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:download" variant="border-filled" alternative-text="Download" title="Download" data-id={entry.id} onclick={handleDownload}></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:signpost" variant="border-filled" alternative-text="Request Signature" title="Request Signature" data-id={entry.id} onclick={handleRequestSignature}></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:scan" variant="border-filled" alternative-text="Trigger OCR" title="Trigger OCR" data-id={entry.id} onclick={handleTriggerOCR}></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:ban" variant="border-filled" alternative-text="Waive" title="Waive" data-id={entry.id} onclick={openWaiveModal}></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:archive" variant="border-filled" alternative-text="Archive" title="Archive" data-id={entry.id} onclick={handleArchive}></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:rows" variant="border-filled" alternative-text="Version History" title="Version History" data-id={entry.id} onclick={handleVersionHistory}></lightning-button-icon>
+                                        </div>
+                                    </article>
+                                </template>
+                            </div>
+                        </template>
+                    </section>
+                </template>
+            </template>
+
+            <template if:false={hasSections}>
+                <template if:false={isLoading}>
+                    <div class="empty-state">No vault documents found.</div>
+                </template>
+            </template>
+
+            <template if:true={hasPreview}>
+                <section class="preview-panel">
+                    <div class="panel-header">
+                        <span>{previewTitle}</span>
+                        <lightning-button-icon icon-name="utility:close" variant="bare" alternative-text="Close" title="Close" onclick={closePreview}></lightning-button-icon>
+                    </div>
+                    <iframe title="Document preview" src={previewUrl}></iframe>
+                </section>
+            </template>
+
+            <template if:true={hasVersions}>
+                <aside class="version-panel">
+                    <div class="panel-header">
+                        <span>Version History</span>
+                        <lightning-button-icon icon-name="utility:close" variant="bare" alternative-text="Close" title="Close" onclick={closeVersions}></lightning-button-icon>
+                    </div>
+                    <template for:each={versions} for:item="version">
+                        <div key={version.id} class="version-row">
+                            <div>{version.title}</div>
+                            <div>v{version.versionNumber}</div>
+                            <div>{version.createdByName}</div>
+                        </div>
+                    </template>
+                </aside>
+            </template>
+        </div>
+    </lightning-card>
+
+    <template if:true={isWaiveModalOpen}>
+        <section role="dialog" tabindex="-1" aria-modal="true" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 class="slds-modal__title">Waive Document</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-textarea label="Reason" value={waiverReason} onchange={handleWaiverReasonChange}></lightning-textarea>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={closeWaiveModal}></lightning-button>
+                    <lightning-button class="slds-m-left_small" variant="brand" label="Waive" onclick={handleWaive}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Signer_Role__c</fullName>
+    <description>Role of this signer in the workflow.</description>
+    <label>Signer Role</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>Onboardee</fullName><default>true</default><label>Onboardee</label></value>
+            <value><fullName>HR Admin</fullName><default>false</default><label>HR Admin</label></value>
+            <value><fullName>Hiring Manager</fullName><default>false</default><label>Hiring Manager</label></value>
+            <value><fullName>Legal Counsel</fullName><default>false</default><label>Legal Counsel</label></value>
+            <value><fullName>Compliance Officer</fullName><default>false</default><label>Compliance Officer</label></value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

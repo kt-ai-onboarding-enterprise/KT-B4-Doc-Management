@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Initiated_By__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>HR Admin who triggered the bulk job.</description>
+    <label>Initiated By</label>
+    <referenceTo>User</referenceTo>
+    <relationshipLabel>Initiated Bulk Document Jobs</relationshipLabel>
+    <relationshipName>InitiatedBulkDocumentJobs</relationshipName>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <type>Lookup</type>
+</CustomField>

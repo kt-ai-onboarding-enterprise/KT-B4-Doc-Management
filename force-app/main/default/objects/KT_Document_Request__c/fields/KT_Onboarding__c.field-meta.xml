@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>KT_Onboarding__c</fullName>
+    <description>Parent onboarding record. Cascade delete removes document checklist items with the onboarding record.</description>
+    <label>KT Onboarding</label>
+    <referenceTo>KT_Onboarding__c</referenceTo>
+    <relationshipLabel>Document Requests</relationshipLabel>
+    <relationshipName>DocumentRequests</relationshipName>
+    <trackHistory>true</trackHistory>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+</CustomField>

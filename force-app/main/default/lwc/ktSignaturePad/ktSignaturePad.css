@@ -1,0 +1,60 @@
+.signature-shell {
+    padding: 0.75rem;
+}
+
+.signer-line {
+    color: #5c5c5c;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.legal-notice {
+    background: #f3f3f3;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+    padding: 0.65rem 0.75rem;
+}
+
+.canvas-wrap {
+    border: 1px solid #747474;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.signature-canvas {
+    background: #fff;
+    display: block;
+    height: 14rem;
+    touch-action: none;
+    width: 100%;
+}
+
+.controls {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: space-between;
+    margin-top: 0.75rem;
+}
+
+.buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.error-message {
+    background: #fff5f5;
+    border: 1px solid #ea001e;
+    border-radius: 6px;
+    color: #ba0517;
+    padding: 0.65rem 0.75rem;
+}
+
+.empty-state {
+    color: #5c5c5c;
+    padding: 0.75rem 0;
+}

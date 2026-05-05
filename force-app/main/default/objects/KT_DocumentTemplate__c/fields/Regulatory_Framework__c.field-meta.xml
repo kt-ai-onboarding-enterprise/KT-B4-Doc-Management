@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Regulatory_Framework__c</fullName>
+    <description>Regulatory frameworks satisfied or tagged by this document template.</description>
+    <label>Regulatory Framework</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <type>MultiselectPicklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>HIPAA</fullName>
+                <default>false</default>
+                <label>HIPAA</label>
+            </value>
+            <value>
+                <fullName>OSHA</fullName>
+                <default>false</default>
+                <label>OSHA</label>
+            </value>
+            <value>
+                <fullName>SOX</fullName>
+                <default>false</default>
+                <label>SOX</label>
+            </value>
+            <value>
+                <fullName>GDPR</fullName>
+                <default>false</default>
+                <label>GDPR</label>
+            </value>
+            <value>
+                <fullName>FDA</fullName>
+                <default>false</default>
+                <label>FDA</label>
+            </value>
+            <value>
+                <fullName>ISO 9001</fullName>
+                <default>false</default>
+                <label>ISO 9001</label>
+            </value>
+            <value>
+                <fullName>ISO 45001</fullName>
+                <default>false</default>
+                <label>ISO 45001</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+    <visibleLines>4</visibleLines>
+</CustomField>

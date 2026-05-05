@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Document_Template__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Template that must be generated or collected for this document request.</description>
+    <label>Document Template</label>
+    <referenceTo>KT_DocumentTemplate__c</referenceTo>
+    <relationshipLabel>Document Requests</relationshipLabel>
+    <relationshipName>DocumentRequests</relationshipName>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <type>Lookup</type>
+</CustomField>

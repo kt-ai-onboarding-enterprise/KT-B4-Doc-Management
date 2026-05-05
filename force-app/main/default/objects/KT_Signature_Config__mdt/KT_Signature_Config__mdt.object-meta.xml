@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Per-domain B4 e-signature settings including default provider, expiry, legal notice, and legal validity requirements.</description>
+    <label>KT Signature Config</label>
+    <pluralLabel>KT Signature Configs</pluralLabel>
+    <visibility>Public</visibility>
+</CustomObject>

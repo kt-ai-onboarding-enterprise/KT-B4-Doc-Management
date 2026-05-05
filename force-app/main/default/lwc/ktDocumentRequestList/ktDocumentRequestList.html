@@ -1,0 +1,117 @@
+<template>
+    <lightning-card title="Document Requests" icon-name="standard:document">
+        <div class="request-list">
+            <div class="summary">
+                <div class="summary__count">{completedCount}/{totalCount}</div>
+                <div class="summary__bar" aria-label="Checklist completion">
+                    <div class="summary__bar-fill" style={completionStyle}></div>
+                </div>
+                <lightning-button-icon
+                    icon-name="utility:refresh"
+                    variant="border-filled"
+                    alternative-text="Refresh"
+                    title="Refresh"
+                    onclick={handleRefresh}>
+                </lightning-button-icon>
+            </div>
+
+            <template if:true={errorMessage}>
+                <div class="error-message" role="alert">{errorMessage}</div>
+            </template>
+
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading document requests" size="small"></lightning-spinner>
+            </template>
+
+            <template if:true={hasRequests}>
+                <div class="table-wrap">
+                    <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Document</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Direction</th>
+                                <th scope="col">Due</th>
+                                <th scope="col">Required</th>
+                                <th scope="col" class="actions-col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={rows} for:item="row">
+                                <tr key={row.id} class={row.rowClass}>
+                                    <th scope="row">
+                                        <div class="doc-name">{row.templateName}</div>
+                                    </th>
+                                    <td>
+                                        <span class={row.statusClass}>{row.status}</span>
+                                    </td>
+                                    <td>{row.documentDirection}</td>
+                                    <td>{row.dueDateLabel}</td>
+                                    <td>{row.requiredLabel}</td>
+                                    <td>
+                                        <div class="actions">
+                                            <lightning-button-icon
+                                                icon-name="utility:preview"
+                                                variant="border-filled"
+                                                alternative-text="Generate"
+                                                title="Generate"
+                                                data-request-id={row.id}
+                                                data-template-id={row.templateId}
+                                                onclick={handleGenerate}
+                                                disabled={row.generateDisabled}>
+                                            </lightning-button-icon>
+                                            <lightning-button-icon
+                                                icon-name="utility:upload"
+                                                variant="border-filled"
+                                                alternative-text="Request Upload"
+                                                title="Request Upload"
+                                                data-request-id={row.id}
+                                                onclick={handleRequestUpload}>
+                                            </lightning-button-icon>
+                                            <lightning-button-icon
+                                                icon-name="utility:ban"
+                                                variant="border-filled"
+                                                alternative-text="Waive"
+                                                title="Waive"
+                                                data-request-id={row.id}
+                                                onclick={openWaiveModal}>
+                                            </lightning-button-icon>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+
+            <template if:false={hasRequests}>
+                <template if:false={isLoading}>
+                    <div class="empty-state">No document requests found.</div>
+                </template>
+            </template>
+        </div>
+    </lightning-card>
+
+    <template if:true={isWaiveModalOpen}>
+        <section role="dialog" tabindex="-1" aria-modal="true" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 class="slds-modal__title">Waive Document</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-textarea
+                        label="Reason"
+                        value={waiverReason}
+                        onchange={handleWaiverReasonChange}>
+                    </lightning-textarea>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={closeWaiveModal}></lightning-button>
+                    <lightning-button class="slds-m-left_small" variant="brand" label="Waive" onclick={handleWaive}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

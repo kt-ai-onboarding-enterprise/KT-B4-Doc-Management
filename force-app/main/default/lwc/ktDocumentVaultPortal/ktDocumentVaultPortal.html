@@ -1,0 +1,79 @@
+<template>
+    <div class="portal-shell">
+        <header class="portal-header">
+            <div>
+                <h2>Documents</h2>
+                <p>{completionLabel}</p>
+            </div>
+            <lightning-button-icon icon-name="utility:refresh" variant="border-filled" alternative-text="Refresh" title="Refresh" onclick={handleRefresh}></lightning-button-icon>
+        </header>
+
+        <div class="completion-track" aria-label="Document completion">
+            <div class="completion-fill" style={completionStyle}></div>
+        </div>
+
+        <template if:true={errorMessage}>
+            <div class="offline-message" role="status">{errorMessage}</div>
+        </template>
+
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading documents" size="small"></lightning-spinner>
+        </template>
+
+        <template if:true={hasDocuments}>
+            <div class="document-list">
+                <template for:each={documents} for:item="doc">
+                    <article key={doc.id} class={doc.cardClass}>
+                        <div class="doc-topline">
+                            <div class="doc-name">{doc.documentName}</div>
+                            <span class={doc.statusClass}>{doc.status}</span>
+                        </div>
+                        <div class="doc-meta">
+                            <span>{doc.documentType}</span>
+                            <span>{doc.signatureStatus}</span>
+                            <span>{doc.ocrStatus}</span>
+                        </div>
+                        <template if:true={doc.hrNotes}>
+                            <div class="hr-note">{doc.hrNotes}</div>
+                        </template>
+                        <div class="doc-actions">
+                            <lightning-button
+                                variant="brand-outline"
+                                label="Upload"
+                                data-id={doc.id}
+                                onclick={openUploadFlow}>
+                            </lightning-button>
+                            <lightning-button
+                                label="View"
+                                data-id={doc.id}
+                                onclick={handleView}
+                                disabled={doc.viewDisabled}>
+                            </lightning-button>
+                        </div>
+                    </article>
+                </template>
+            </div>
+        </template>
+
+        <template if:false={hasDocuments}>
+            <template if:false={isLoading}>
+                <div class="empty-state">No documents found.</div>
+            </template>
+        </template>
+
+        <template if:true={showUploadFlow}>
+            <section class="flow-panel">
+                <div class="flow-panel__header">
+                    <span>Upload</span>
+                    <lightning-button-icon icon-name="utility:close" variant="bare" alternative-text="Close" title="Close" onclick={closeUploadFlow}></lightning-button-icon>
+                </div>
+                <template if:true={hasUploadFlow}>
+                    <lightning-flow flow-api-name={uploadFlowApiName} flow-input-variables={flowInputVariables} onstatuschange={handleFlowStatus}></lightning-flow>
+                </template>
+                <template if:false={hasUploadFlow}>
+                    <c-kt-document-upload kt-onboarding-id={effectiveOnboardingId} document-request-id={selectedDocumentRequestId} onuploaded={handleInlineUpload}></c-kt-document-upload>
+                </template>
+            </section>
+        </template>
+    </div>
+</template>

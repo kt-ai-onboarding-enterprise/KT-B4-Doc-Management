@@ -1,0 +1,103 @@
+.request-list {
+    padding: 0.75rem;
+}
+
+.summary {
+    align-items: center;
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: auto minmax(8rem, 1fr) auto;
+    margin-bottom: 0.75rem;
+}
+
+.summary__count {
+    color: #181818;
+    font-weight: 700;
+}
+
+.summary__bar {
+    background: #e5e5e5;
+    border-radius: 4px;
+    height: 0.5rem;
+    overflow: hidden;
+}
+
+.summary__bar-fill {
+    background: #2e844a;
+    height: 100%;
+    transition: width 160ms ease;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+.doc-name {
+    font-weight: 600;
+    min-width: 11rem;
+}
+
+.actions {
+    display: inline-grid;
+    gap: 0.35rem;
+    grid-auto-flow: column;
+}
+
+.actions-col {
+    width: 7.5rem;
+}
+
+.status-pill {
+    border-radius: 999px;
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1;
+    padding: 0.35rem 0.5rem;
+    white-space: nowrap;
+}
+
+.not-started,
+.in-progress {
+    background: #eef4ff;
+    color: #0b5cab;
+}
+
+.awaiting-signature {
+    background: #fff7e0;
+    color: #8c4b02;
+}
+
+.complete {
+    background: #e3fcef;
+    color: #166534;
+}
+
+.waived {
+    background: #f3f3f3;
+    color: #444;
+}
+
+.rejected,
+.overdue-row .status-pill {
+    background: #fff5f5;
+    color: #ba0517;
+}
+
+.overdue-row {
+    background: #fffafa;
+}
+
+.error-message {
+    background: #fff5f5;
+    border: 1px solid #ea001e;
+    border-radius: 6px;
+    color: #ba0517;
+    margin-bottom: 0.75rem;
+    padding: 0.65rem 0.75rem;
+}
+
+.empty-state {
+    color: #5c5c5c;
+    padding: 0.75rem 0;
+}

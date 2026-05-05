@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Default_Provider__c</fullName>
+    <description>Default e-signature provider for this domain.</description>
+    <label>Default Provider</label>
+    <required>true</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>KT Sign</fullName><default>true</default><label>KT Sign</label></value>
+            <value><fullName>DocuSign</fullName><default>false</default><label>DocuSign</label></value>
+            <value><fullName>Adobe Sign</fullName><default>false</default><label>Adobe Sign</label></value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

@@ -1,0 +1,48 @@
+.config-shell {
+    padding: 0.75rem;
+}
+
+.settings-grid {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.signer-list {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.signer-row {
+    align-items: end;
+    border: 1px solid #d8dde6;
+    border-radius: 6px;
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: 1fr 1fr minmax(9rem, 0.8fr) minmax(5rem, 0.35fr) auto;
+    padding: 0.75rem;
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 0.75rem;
+}
+
+.error-message {
+    background: #fff5f5;
+    border: 1px solid #ea001e;
+    border-radius: 6px;
+    color: #ba0517;
+    margin-top: 0.75rem;
+    padding: 0.65rem 0.75rem;
+}
+
+@media (max-width: 760px) {
+    .settings-grid,
+    .signer-row {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,51 @@
+<template>
+    <lightning-card title="Document Preview" icon-name="doctype:pdf">
+        <div class="preview-shell">
+            <div class="toolbar">
+                <lightning-input
+                    class="template-input"
+                    type="text"
+                    label="Template Id"
+                    value={draftTemplateId}
+                    onchange={handleTemplateChange}
+                    disabled={hasTemplateApiValue}>
+                </lightning-input>
+                <lightning-button
+                    variant="brand"
+                    label="Generate"
+                    onclick={handleGenerate}
+                    disabled={isGenerateDisabled}>
+                </lightning-button>
+            </div>
+
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading preview" size="small"></lightning-spinner>
+            </template>
+
+            <template if:true={errorMessage}>
+                <div class="error-message" role="alert">{errorMessage}</div>
+            </template>
+
+            <template if:true={hasRows}>
+                <div class="completion-bar" aria-label="Merge field completion">
+                    <div class="completion-bar__fill" style={completionStyle}></div>
+                </div>
+
+                <div class="preview-grid">
+                    <template for:each={rows} for:item="row">
+                        <div key={row.token} class={row.rowClass}>
+                            <div class="token">{row.token}</div>
+                            <div class="value">{row.value}</div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            <template if:false={hasRows}>
+                <template if:false={isLoading}>
+                    <div class="empty-state">No merge fields found.</div>
+                </template>
+            </template>
+        </div>
+    </lightning-card>
+</template>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>KT_DocumentVault__c</fullName>
+    <description>Document vault entry being signed.</description>
+    <label>KT Document Vault</label>
+    <referenceTo>KT_DocumentVault__c</referenceTo>
+    <relationshipLabel>Signature Requests</relationshipLabel>
+    <relationshipName>SignatureRequests</relationshipName>
+    <trackHistory>true</trackHistory>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+</CustomField>

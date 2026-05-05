@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Provider_Name__c</fullName>
+    <description>OCR provider name.</description>
+    <label>Provider Name</label>
+    <required>true</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>AWS Textract</fullName><default>true</default><label>AWS Textract</label></value>
+            <value><fullName>Azure Form Recognizer</fullName><default>false</default><label>Azure Form Recognizer</label></value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

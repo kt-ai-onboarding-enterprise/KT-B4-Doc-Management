@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Maps domain and persona combinations to required document templates for B4 checklist generation.</description>
+    <label>KT Document Template Config</label>
+    <pluralLabel>KT Document Template Configs</pluralLabel>
+    <visibility>Public</visibility>
+</CustomObject>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Hiring_Manager__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Hiring manager responsible for the onboardee. B4 vault/request access for manager users is scoped through this lookup.</description>
+    <label>Hiring Manager</label>
+    <referenceTo>User</referenceTo>
+    <relationshipLabel>Hiring Managed Onboardings</relationshipLabel>
+    <relationshipName>Hiring_Managed_Onboardings</relationshipName>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <type>Lookup</type>
+</CustomField>
