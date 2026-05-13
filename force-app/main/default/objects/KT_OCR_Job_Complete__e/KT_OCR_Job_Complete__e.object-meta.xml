@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <deploymentStatus>Deployed</deploymentStatus>
+    <description>B4 platform event published when OCR extraction completes for a document job.</description>
+    <eventType>HighVolume</eventType>
+    <label>KT OCR Job Complete</label>
+    <pluralLabel>KT OCR Job Complete Events</pluralLabel>
+    <publishBehavior>PublishAfterCommit</publishBehavior>
+</CustomObject>

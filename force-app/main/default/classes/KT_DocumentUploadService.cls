@@ -84,7 +84,7 @@ public with sharing class KT_DocumentUploadService {
             );
         }
 
-        publishDocumentUploadedEvent(onboardingId, vaultEntry.Id, insertedVersion.ContentDocumentId);
+        publishDocumentUploadedEvent(onboardingId, vaultEntry.Id, insertedVersion.ContentDocumentId, vaultEntry.Document_Type__c);
 
         UploadResult result = new UploadResult();
         result.vaultEntryId = vaultEntry.Id;
@@ -152,12 +152,39 @@ public with sharing class KT_DocumentUploadService {
         return result;
     }
 
-    private static void publishDocumentUploadedEvent(Id onboardingId, Id vaultEntryId, Id contentDocumentId) {
+    private static void publishDocumentUploadedEvent(Id onboardingId, Id vaultEntryId, Id contentDocumentId, String documentType) {
         Schema.SObjectType eventType = Schema.getGlobalDescribe().get('KT_Document_Uploaded__e');
         if (eventType == null) {
             return;
         }
-        EventBus.publish(eventType.newSObject());
+
+        SObject eventRecord = eventType.newSObject();
+        Map<String, Schema.SObjectField> eventFields = eventType.getDescribe().fields.getMap();
+        if (eventFields.containsKey('ContentDocumentId__c')) {
+            eventRecord.put('ContentDocumentId__c', String.valueOf(contentDocumentId));
+        }
+        if (eventFields.containsKey('OnboardingId__c')) {
+            eventRecord.put('OnboardingId__c', String.valueOf(onboardingId));
+        }
+        if (eventFields.containsKey('KT_Onboarding__c')) {
+            eventRecord.put('KT_Onboarding__c', onboardingId);
+        }
+        if (eventFields.containsKey('Onboarding_Id__c')) {
+            eventRecord.put('Onboarding_Id__c', String.valueOf(onboardingId));
+        }
+        if (eventFields.containsKey('DocumentType__c')) {
+            eventRecord.put('DocumentType__c', documentType);
+        }
+        if (eventFields.containsKey('UploadedBy__c')) {
+            eventRecord.put('UploadedBy__c', String.valueOf(UserInfo.getUserId()));
+        }
+        if (eventFields.containsKey('Timestamp__c')) {
+            eventRecord.put('Timestamp__c', System.now());
+        }
+        if (eventFields.containsKey('VaultId__c')) {
+            eventRecord.put('VaultId__c', String.valueOf(vaultEntryId));
+        }
+        EventBus.publish(eventRecord);
     }
 
     private static String stripDataUrlPrefix(String value) {

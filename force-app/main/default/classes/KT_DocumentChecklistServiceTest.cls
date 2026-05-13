@@ -118,6 +118,44 @@ private class KT_DocumentChecklistServiceTest {
     }
 
     @IsTest
+    static void createRequestsFromConfigsBulkHandlesFiftyOnboardings() {
+        List<KT_Onboarding__c> onboardings = new List<KT_Onboarding__c>();
+        for (Integer index = 0; index < 50; index++) {
+            onboardings.add(new KT_Onboarding__c());
+        }
+        insert onboardings;
+
+        List<Id> onboardingIds = new List<Id>();
+        for (KT_Onboarding__c onboarding : onboardings) {
+            onboardingIds.add(onboarding.Id);
+        }
+
+        KT_DocumentTemplate__c template = createTemplate('Bulk Checklist Template', true);
+
+        Test.startTest();
+        Map<Id, KT_DocumentChecklistService.ChecklistResult> resultsByOnboarding =
+            KT_DocumentChecklistService.createRequestsFromConfigsBulk(
+                onboardingIds,
+                new List<KT_Document_Template_Config__mdt>{
+                    config('Bulk Checklist Template', 'ALL', 'ALL', true, 3)
+                }
+            );
+        Test.stopTest();
+
+        System.assertEquals(50, resultsByOnboarding.size());
+        for (Id onboardingId : onboardingIds) {
+            System.assertEquals(1, resultsByOnboarding.get(onboardingId).createdCount);
+            System.assertEquals(0, resultsByOnboarding.get(onboardingId).skippedCount);
+        }
+        System.assertEquals(50, [
+            SELECT COUNT()
+            FROM KT_Document_Request__c
+            WHERE KT_Onboarding__c IN :onboardingIds
+            AND Document_Template__c = :template.Id
+        ]);
+    }
+
+    @IsTest
     static void documentRequestListActionsReturnRowsAndUpdateStatus() {
         KT_Onboarding__c onboarding = createOnboarding();
         KT_DocumentTemplate__c template = createTemplate('Portal Upload', true);

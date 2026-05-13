@@ -71,6 +71,7 @@ public with sharing class KT_DocumentGeneratorService {
         insert vaultEntry;
 
         updateMatchingDocumentRequest(onboardingId, template.Id, vaultEntry.Id, template.Requires_Signature__c);
+        publishDocumentGeneratedEvent(vaultEntry.Id, onboardingId, template.Id, vaultEntry.Document_Type__c);
 
         KT_DocGenResult result = new KT_DocGenResult();
         result.vaultEntryId = vaultEntry.Id;
@@ -329,6 +330,44 @@ public with sharing class KT_DocumentGeneratorService {
             request.Completed_Date__c = System.now();
         }
         update request;
+    }
+
+    private static void publishDocumentGeneratedEvent(Id vaultEntryId, Id onboardingId, Id templateId, String documentType) {
+        Schema.SObjectType eventType = Schema.getGlobalDescribe().get('KT_Document_Generated__e');
+        if (eventType == null) {
+            return;
+        }
+
+        SObject eventRecord = eventType.newSObject();
+        Map<String, Schema.SObjectField> eventFields = eventType.getDescribe().fields.getMap();
+        if (eventFields.containsKey('VaultId__c')) {
+            eventRecord.put('VaultId__c', String.valueOf(vaultEntryId));
+        }
+        if (eventFields.containsKey('KT_DocumentVault__c')) {
+            eventRecord.put('KT_DocumentVault__c', vaultEntryId);
+        }
+        if (eventFields.containsKey('Document_Vault_Id__c')) {
+            eventRecord.put('Document_Vault_Id__c', String.valueOf(vaultEntryId));
+        }
+        if (eventFields.containsKey('OnboardingId__c')) {
+            eventRecord.put('OnboardingId__c', String.valueOf(onboardingId));
+        }
+        if (eventFields.containsKey('KT_Onboarding__c')) {
+            eventRecord.put('KT_Onboarding__c', onboardingId);
+        }
+        if (eventFields.containsKey('Onboarding_Id__c')) {
+            eventRecord.put('Onboarding_Id__c', String.valueOf(onboardingId));
+        }
+        if (eventFields.containsKey('TemplateId__c')) {
+            eventRecord.put('TemplateId__c', String.valueOf(templateId));
+        }
+        if (eventFields.containsKey('DocumentType__c')) {
+            eventRecord.put('DocumentType__c', documentType);
+        }
+        if (eventFields.containsKey('Timestamp__c')) {
+            eventRecord.put('Timestamp__c', System.now());
+        }
+        EventBus.publish(eventRecord);
     }
 
     private static String firstString(Map<String, Object> row, List<String> keys) {

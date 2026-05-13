@@ -263,12 +263,16 @@ public with sharing class KT_ESignatureOrchestrator {
 
     public static void completeWorkflow(Id signatureRequestId) {
         KT_Signature_Request__c signatureRequest = [
-            SELECT Id, KT_DocumentVault__c, KT_DocumentVault__r.Content_Document_Id__c
+            SELECT Id, Status__c, KT_Onboarding__c, KT_DocumentVault__c, KT_DocumentVault__r.Content_Document_Id__c,
+                   KT_DocumentVault__r.Document_Request__c
             FROM KT_Signature_Request__c
             WHERE Id = :signatureRequestId
             LIMIT 1
             FOR UPDATE
         ];
+        if (signatureRequest.Status__c == 'Fully Signed') {
+            return;
+        }
         refreshCounts(signatureRequestId);
 
         signatureRequest.Status__c = 'Fully Signed';
@@ -281,6 +285,9 @@ public with sharing class KT_ESignatureOrchestrator {
             Signature_Status__c = 'Fully Signed'
         );
 
+        Id documentRequestId = signatureRequest.KT_DocumentVault__r == null
+            ? null
+            : signatureRequest.KT_DocumentVault__r.Document_Request__c;
         List<KT_Document_Request__c> requests = [
             SELECT Id
             FROM KT_Document_Request__c
@@ -288,15 +295,24 @@ public with sharing class KT_ESignatureOrchestrator {
             LIMIT 1
         ];
         if (!requests.isEmpty()) {
+            documentRequestId = requests[0].Id;
+        }
+        if (documentRequestId != null) {
             update new KT_Document_Request__c(
-                Id = requests[0].Id,
+                Id = documentRequestId,
                 Status__c = 'Complete',
                 Completed_Date__c = System.now()
             );
         }
 
         createAuditEvent(null, signatureRequestId, 'Completed', null);
-        publishSignatureCompleteEvent(signatureRequestId, signatureRequest.KT_DocumentVault__c);
+        publishSignatureCompleteEvent(
+            signatureRequestId,
+            signatureRequest.KT_Onboarding__c,
+            signatureRequest.Completed_Document_Id__c,
+            System.now(),
+            signatureRequest.KT_DocumentVault__c
+        );
     }
 
     public static void handleExpiryEscalation(Id signatureRequestId) {
@@ -437,7 +453,13 @@ public with sharing class KT_ESignatureOrchestrator {
         return value.startsWith('data:') && commaIndex > -1 ? value.substring(commaIndex + 1) : value;
     }
 
-    private static void publishSignatureCompleteEvent(Id signatureRequestId, Id vaultId) {
+    private static void publishSignatureCompleteEvent(
+        Id signatureRequestId,
+        Id onboardingId,
+        Id documentId,
+        Datetime completedAt,
+        Id vaultId
+    ) {
         Schema.SObjectType eventType = Schema.getGlobalDescribe().get('KT_Signature_Complete__e');
         if (eventType == null) {
             return;
@@ -449,6 +471,24 @@ public with sharing class KT_ESignatureOrchestrator {
         }
         if (eventFields.containsKey('Signature_Request_Id__c')) {
             eventRecord.put('Signature_Request_Id__c', String.valueOf(signatureRequestId));
+        }
+        if (eventFields.containsKey('SignatureRequestId__c')) {
+            eventRecord.put('SignatureRequestId__c', String.valueOf(signatureRequestId));
+        }
+        if (eventFields.containsKey('OnboardingId__c')) {
+            eventRecord.put('OnboardingId__c', String.valueOf(onboardingId));
+        }
+        if (eventFields.containsKey('KT_Onboarding__c')) {
+            eventRecord.put('KT_Onboarding__c', onboardingId);
+        }
+        if (eventFields.containsKey('DocumentId__c')) {
+            eventRecord.put('DocumentId__c', String.valueOf(documentId));
+        }
+        if (eventFields.containsKey('CompletedAt__c')) {
+            eventRecord.put('CompletedAt__c', completedAt);
+        }
+        if (eventFields.containsKey('AllSignersSigned__c')) {
+            eventRecord.put('AllSignersSigned__c', true);
         }
         if (eventFields.containsKey('KT_DocumentVault__c')) {
             eventRecord.put('KT_DocumentVault__c', vaultId);

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <description>Subscribes to KT_Document_Uploaded__e and routes eligible uploaded documents into the B4 OCR ingestion pipeline.</description>
+    <interviewLabel>KT OCR Upload Pipeline {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>KT OCR Upload Pipeline</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Run_OCR_Upload_Pipeline</targetReference>
+        </connector>
+        <object>KT_Document_Uploaded__e</object>
+        <triggerType>PlatformEvent</triggerType>
+    </start>
+    <actionCalls>
+        <name>Run_OCR_Upload_Pipeline</name>
+        <label>Run OCR Upload Pipeline</label>
+        <locationX>176</locationX>
+        <locationY>134</locationY>
+        <actionName>KT_OcrUploadPipelineService</actionName>
+        <actionType>apex</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>vaultId</name>
+            <value>
+                <elementReference>$Record.VaultId__c</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>contentDocumentId</name>
+            <value>
+                <elementReference>$Record.ContentDocumentId__c</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>onboardingId</name>
+            <value>
+                <elementReference>$Record.OnboardingId__c</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>documentType</name>
+            <value>
+                <elementReference>$Record.DocumentType__c</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>uploadedBy</name>
+            <value>
+                <elementReference>$Record.UploadedBy__c</elementReference>
+            </value>
+        </inputParameters>
+    </actionCalls>
+    <status>Active</status>
+</Flow>

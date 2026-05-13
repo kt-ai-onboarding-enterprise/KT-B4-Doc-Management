@@ -1,0 +1,1600 @@
+
+KT ONBOARDING ENTERPRISE
+Feature B4 — Document Management & CLM
+End-to-End Design Document
+Document Version
+v1.0 — B4 Standalone Feature Design
+Feature
+B4 — Document Management & CLM (Expanded)
+Platform
+Salesforce (Hyperforce-Ready) — AppExchange Managed Package
+Tech Stack
+LWC + Apex + Salesforce Flow (No OmniStudio)
+OCR Providers
+AWS Textract / Azure Form Recognizer (provider-agnostic via CMT)
+Status
+★ Newly Added — Enterprise Universal v2.0
+Date
+April 2026
+Classification
+Internal — Architecture & Engineering
+Table of Contents
+TOC \h \o "1-3"
+1. Executive Summary & Business Context
+Feature B4 — Document Management & Contract Lifecycle Management (CLM) — is the end-to-end document engine of the KT Onboarding Enterprise platform. It eliminates paper-based, email-driven, and manually rekeyed document processes by delivering template-driven generation, multi-party e-signature, OCR-powered ingestion, a secure per-onboardee document vault, and bulk-send capability — all natively within Salesforce, with no OmniStudio dependency.
+💡  Strategic Positioning
+B4 is a horizontal enabler for KT Onboarding. Every other feature — B5 (Identity Verification), B6 (Compliance Engine), B9 (Training & LMS), B13 (Personas) — depends on B4 to generate, store, and route documents. It is the document backbone of the entire platform.
+1.1  Problem Being Solved
+Without B4
+With B4
+Documents emailed as attachments; rekeyed manually into HR systems
+200+ templates auto-generated with Salesforce merge fields — zero rekeying
+No version control on offer letters, NDAs, or policy documents
+Full document versioning with audit trail — every version stored in vault
+Multi-party signing managed via email chains; no expiry enforcement
+Automated signing order, delegation, expiry handling, and completion tracking
+Uploaded passports and certificates parsed manually by HR
+OCR auto-extracts structured data from scanned IDs and certificates
+Bulk onboarding cohorts (100+ starters) took days to dispatch documents
+Batch Apex processes 1,000+ simultaneous document sends asynchronously
+Compliance audits required manual document assembly
+Audit-ready document vault per onboardee — all docs versioned and timestamped
+1.2  Key Value Propositions
+200+ pre-built DOCX/PDF templates across all 8 KT domains — ready out-of-the-box
+Dynamic generation using Salesforce data merge — no manual field population
+KT Sign (native e-signature) included from Professional tier — no DocuSign license required for basic use
+OCR ingestion via AWS Textract or Azure Form Recognizer — provider switchable via Custom Metadata
+Bulk send to 1,000+ onboardees simultaneously via Batch Apex with Queueable chaining
+Fully integrated with B1 (DIE), B5 (Verification), B6 (Compliance), B9 (Training) for end-to-end document lifecycle
+AppExchange-safe: managed package with namespace protection, upgrade-safe metadata
+1.3  Alignment with KT Platform Features
+Feature
+How B4 Integrates
+B1 — Domain Intelligence Engine
+DIE auto-selects document templates based on domain + persona; triggers B4 document checklist creation
+B3 — Smart Form Builder
+KT Sign (B4) captures e-signatures within Smart Forms; form submissions trigger document generation
+B5 — Identity & Credential Verification
+Uploaded identity documents (passports, licenses) flow into B4 OCR pipeline for structured data extraction
+B6 — Compliance Engine
+Compliance task completion triggers document generation (e.g., HIPAA consent, OSHA acknowledgment)
+B7 — Onboardee Portal
+Onboardees upload documents via portal; HR dispatches signed documents back through portal vault view
+B9 — Training & LMS
+Certificate auto-generation on course pass uses B4 Document Generator; cert stored in document vault
+B10 — Analytics
+Document completion rates, signing SLA breaches, vault completeness fed into CRM Analytics dashboards
+B13 — Persona Types
+Each persona has a dedicated document checklist defined in B4 Custom Metadata; composite personas merge checklists
+B4  
+Document Management & CLM
+Category: Documents   │   Tech Layer: LWC + Apex + Salesforce Flow   │   Status: ★ Newly Added
+2. Feature Capabilities — Complete Inventory
+The following table documents every sub-feature and micro-capability within B4. Each is individually addressed in the technical design sections that follow.
+#
+Sub-Feature / Capability
+Tier
+Sprint
+B4.1
+Document Template Library — 200+ DOCX/PDF templates across 8 domains
+Starter+
+S4
+B4.2
+Dynamic document generation — Salesforce data merge fields (Apex-powered)
+Starter+
+S4
+B4.3
+Real-time document preview before generation (ktDocumentPreview LWC)
+Professional+
+S4
+B4.4
+KT Sign — native canvas-based e-signature (touch + stylus)
+Professional+
+S4
+B4.5
+Multi-party e-signature — configurable signing order
+Professional+
+S4
+B4.6
+E-signature delegation — signer unavailable → alternate authorized signer
+Professional+
+S4
+B4.7
+E-signature expiry — auto-escalation after configurable expiry period
+Professional+
+S4
+B4.8
+E-signature audit trail — IP, timestamp (UTC), device UA, geolocation
+Professional+
+S4
+B4.9
+DocuSign add-on integration (envelope API, status webhooks, completed doc retrieval)
+Add-On
+S4
+B4.10
+Adobe Sign add-on integration
+Add-On
+S8
+B4.11
+Secure per-onboardee document vault (KT_DocumentVault__c)
+Starter+
+S4
+B4.12
+Document versioning — full version history per document
+Starter+
+S4
+B4.13
+Document access control — role-based visibility within vault
+Professional+
+S4
+B4.14
+Document expiry tracking — certs, licenses, and compliance docs with expiry date
+Professional+
+S4
+B4.15
+OCR document ingestion — passport, ID, certificate → structured Salesforce data
+Enterprise+
+S6
+B4.16
+OCR provider: AWS Textract (configurable via CMT)
+Enterprise+
+S6
+B4.17
+OCR provider: Azure Form Recognizer (configurable via CMT)
+Enterprise+
+S6
+B4.18
+OCR field mapping — configurable per document type via KT_OCR_FieldMapping__mdt
+Enterprise+
+S6
+B4.19
+OCR review UI — HR one-click accept/reject before writing to onboarding record
+Enterprise+
+S6
+B4.20
+Bulk document send — 1,000+ simultaneous onboardees via Batch Apex
+Enterprise+
+S4
+B4.21
+Batch document status tracking — per-record status with failure logging
+Enterprise+
+S4
+B4.22
+Document checklist auto-generation by DIE on onboarding record creation
+Starter+
+S1
+B4.23
+Required vs. optional document classification per persona/domain
+Starter+
+S1
+B4.24
+Document request reminders — Flow-triggered via email/SMS/in-portal
+Starter+
+S4
+B4.25
+Agentforce HR Copilot integration — OCR discrepancy flagging
+Enterprise+
+S6
+B4.26
+Agentforce Compliance Auditor integration — missing document gap alerts
+Enterprise+
+S6
+B4.27
+MCP tool kt_upload_document (Headless 360)
+Enterprise+
+S7
+B4.28
+Trusted Agent Identity for SOX/HIPAA high-value signature authorization
+Enterprise+
+S8
+B4.29
+AXL — signing tiles rendered natively in Slack/Teams
+Enterprise+
+S8
+B4.30
+Data Cloud streaming — document vault events to unified onboardee profile
+Enterprise+
+S6
+3. Architecture Overview
+B4 is composed of five architectural layers: Document Generation, E-Signature Orchestration, OCR Ingestion, Document Vault, and Bulk Processing. Each layer is fully Salesforce-native, built on LWC + Apex + Salesforce Flow — with no OmniStudio components.
+🏗️  Architecture Principle — No OmniStudio
+All guided experiences previously handled by OmniScript are replaced with Salesforce Screen Flows (for step-by-step HR workflows) and LWC (for real-time interactive UI). All external API callouts previously handled by OmniStudio Integration Procedures are replaced with Apex HttpCallout classes using Named Credentials. This maintains full governor limit safety and upgrade compatibility.
+3.1  Layer Architecture
+Layer
+Technology
+Responsibility
+Presentation
+LWC (ktDocumentPreview, ktDocumentVault, ktESignatureConfig, ktOCRReview)
+Document preview, vault browsing, signing configuration, OCR review UI
+Guided Workflow
+Salesforce Screen Flow
+Step-by-step document dispatch, signing order configuration, bulk send wizard
+Automation
+Record-Triggered Flow + Scheduled Flow
+Compliance document triggers, expiry reminders, signing escalation, vault status updates
+Business Logic
+Apex Service Classes
+Document generation (DOCX/PDF), e-signature orchestration, OCR API calls, bulk processing
+Batch Processing
+Apex Batch + Queueable
+Asynchronous bulk document generation and dispatch to 1,000+ onboardees
+Integration
+Named Credentials + Apex HttpCallout
+DocuSign API, Adobe Sign API, AWS Textract, Azure Form Recognizer — all via Named Credentials
+Events
+Platform Events
+Async document upload events, OCR completion events, signing completion events
+AI
+Agentforce (HR Copilot + Compliance Auditor)
+OCR discrepancy flagging, missing document gap alerts, natural-language document status queries
+Data Unification
+Salesforce Data Cloud
+Document vault events streamed to unified onboardee profile for compliance scoring
+Distribution
+AppExchange 2GP Managed Package
+Namespace-protected, upgrade-safe deployment to subscriber orgs
+3.2  Component Interaction Diagram
+The flow below describes the end-to-end document lifecycle for a typical new employee onboarding scenario:
+Step
+Actor
+Component
+Action
+1
+DIE (B1)
+KT_DIE_Trigger → KT_DocumentChecklistService.cls
+On KT_Onboarding__c insert: query KT_Document_Template__mdt for domain/persona, create KT_Document_Request__c records
+2
+HR Admin
+ktDocumentPreview LWC
+HR opens onboarding record, previews auto-selected document templates with merged Salesforce data
+3
+HR Admin
+KT_DocumentGeneratorService.cls
+HR triggers generation — Apex merges data, creates ContentVersion (DOCX/PDF), links to KT_DocumentVault__c
+4
+HR Admin
+ktESignatureConfig LWC + Screen Flow
+HR configures signing order, signer roles, expiry via guided Screen Flow
+5
+System
+KT_ESignatureOrchestrator.cls
+Signing invitation dispatched via Email Template + Messaging Channel; KT_Signature_Request__c created
+6
+Onboardee
+Experience Cloud Portal (B7) or external KT Sign URL
+Onboardee opens signing link, reviews document, applies canvas signature via ktSignaturePad LWC
+7
+System
+KT_ESignatureOrchestrator.cls + Platform Event
+Signature stored as ContentVersion; KT_Signature_Audit__c created; Platform Event published
+8
+System
+Record-Triggered Flow
+KT_DocumentVault__c status updated; KT_Document_Request__c marked complete; B6 Compliance Check updated
+9
+Onboardee
+B7 Portal — document upload
+Onboardee uploads passport/certificate; Platform Event KT_Document_Uploaded__e published
+10
+System
+KT_OcrIngestionService.cls
+OCR API called (AWS Textract or Azure Form Recognizer via Named Credential); structured JSON returned
+11
+HR Admin
+ktOCRReview LWC
+HR reviews extracted data, accepts/rejects field-by-field before writing to onboarding record
+12
+Agentforce
+KT HR Copilot
+Copilot reviews OCR results vs. existing record data, flags discrepancies; alerts HR via in-app notification
+4. Data Model — Complete Object Reference
+B4 introduces 8 new custom objects, 4 Custom Metadata Types, and extends 2 existing KT objects. All objects use the KT__ namespace in the managed package.
+4.1  Custom Objects
+KT_Document_Request__c — Document Checklist Item
+Created by the DIE at onboarding record creation. One record per required document per onboardee. Drives the document checklist in the portal and HR UI.
+Field API Name
+Type
+Description
+KT_Onboarding__c
+Master-Detail (KT_Onboarding__c)
+Parent onboarding record — cascade delete
+Document_Template__c
+Lookup (KT_DocumentTemplate__c)
+Points to the template that must be generated or collected
+Status__c
+Picklist
+Not Started / In Progress / Awaiting Signature / Complete / Waived / Rejected
+Is_Required__c
+Checkbox
+If true, document must be complete before journey stage progression (Mandatory enforcement)
+Due_Date__c
+Date
+Calculated from domain/persona SLA; used for reminder triggers and overdue detection
+Document_Direction__c
+Picklist
+Outbound (KT generates and sends) / Inbound (onboardee uploads) / Both
+Waiver_Reason__c
+Text (255)
+Populated by HR if document is waived with justification; immutable once set
+Completed_Date__c
+DateTime
+Timestamp when document status changed to Complete — formula-populated
+Document_Vault_Entry__c
+Lookup (KT_DocumentVault__c)
+Link to the actual stored document once complete
+Reminder_Count__c
+Number
+Number of reminders sent — incremented by Scheduled Flow for reminder throttling
+KT_DocumentTemplate__c — Template Definition
+Stores the binary template file and all configuration metadata. One record per template. Managed by HR Admins or delivered via managed package.
+Field API Name
+Type
+Description
+Template_Name__c
+Text (255)
+Human-readable name — e.g., 'UK Employment Contract — Healthcare New Employee'
+Template_Binary__c
+Lookup (ContentDocument)
+Reference to the DOCX or PDF template file stored in Salesforce Files
+Output_Format__c
+Picklist
+DOCX / PDF / Both — determines generated file format
+Domain__c
+Text (255)
+Comma-separated domain codes — e.g., 'Healthcare,Manufacturing'. Blank = all domains
+Persona__c
+Text (255)
+Comma-separated persona codes — e.g., 'NewEmployee,Contractor'. Blank = all personas
+Merge_Field_Map__c
+Long Text Area (32768)
+JSON array mapping template placeholder tokens to Salesforce field API names
+Requires_Signature__c
+Checkbox
+If true, triggers e-signature workflow post-generation
+Signer_Roles__c
+Long Text Area
+JSON array defining signer roles, order, and role type (Onboardee/Manager/Legal/HR)
+Signature_Expiry_Days__c
+Number
+Days after dispatch before unsigned document triggers escalation
+Is_Active__c
+Checkbox
+Inactive templates excluded from DIE selection and checklist generation
+Regulatory_Framework__c
+Picklist (Multi)
+HIPAA / OSHA / SOX / GDPR / FDA / ISO 9001 / ISO 45001 — for compliance tagging
+Version__c
+Number
+Auto-incremented version number — previous versions retained for audit purposes
+Language__c
+Picklist
+Primary language of template — used for locale-based template selection
+KT_DocumentVault__c — Per-Onboardee Document Store Index
+Central index of all documents associated with an onboarding record. Each entry points to a Salesforce ContentDocument. Provides document lifecycle tracking and access control beyond native Salesforce Files.
+Field API Name
+Type
+Description
+KT_Onboarding__c
+Master-Detail (KT_Onboarding__c)
+Parent onboarding record
+Document_Name__c
+Text (255)
+Display name of the document — may differ from ContentDocument title
+Content_Document_Id__c
+Text (18)
+Salesforce ContentDocument ID — used to retrieve latest ContentVersion
+Document_Type__c
+Picklist
+Generated / Uploaded / External / Certificate / Identity Document / Compliance Record
+Status__c
+Picklist
+Draft / Pending Signature / Signed / Verified / Expired / Archived
+Document_Request__c
+Lookup (KT_Document_Request__c)
+Links vault entry back to the checklist item that required this document
+Expiry_Date__c
+Date
+For certificates and licenses with defined validity periods
+Is_Expired__c
+Formula (Checkbox)
+TODAY() &gt; Expiry_Date__c — drives expiry alerts in B6 Compliance Engine
+Uploaded_By__c
+Lookup (User)
+User (HR or Onboardee Experience Cloud user) who added this document
+Upload_Timestamp__c
+DateTime
+When the document was added to the vault
+OCR_Status__c
+Picklist
+Not Required / Pending / Processing / Review Required / Accepted / Failed
+Version_Number__c
+Number
+Document version — incremented on each replace/update
+Signature_Status__c
+Picklist
+Not Required / Pending / Partially Signed / Fully Signed / Expired / Delegated
+Regulatory_Tag__c
+Text (255)
+Regulatory frameworks this document satisfies — populated from template on generation
+KT_Signature_Request__c — E-Signature Workflow
+One record per signing workflow per document. Tracks the overall multi-party signing lifecycle. Child records KT_Signer__c track individual signer status.
+Field API Name
+Type
+Description
+KT_DocumentVault__c
+Master-Detail (KT_DocumentVault__c)
+Document being signed
+KT_Onboarding__c
+Lookup (KT_Onboarding__c)
+Parent onboarding record (denormalized for reporting)
+Signing_Provider__c
+Picklist
+KT Sign / DocuSign / Adobe Sign
+Status__c
+Picklist
+Configured / In Progress / Partially Signed / Fully Signed / Expired / Cancelled
+Total_Signers__c
+Number
+Total number of required signers
+Completed_Signers__c
+Number (rollup)
+Rollup of KT_Signer__c where Status = Signed
+Expiry_Date__c
+Date
+Deadline for all signatures — triggers escalation via Scheduled Flow
+Signing_Order__c
+Picklist
+Sequential / Parallel — determines how signer invitations are dispatched
+External_Envelope_Id__c
+Text (255)
+Provider-assigned ID (DocuSign envelope ID or Adobe agreement ID) — for webhook correlation
+Completed_Document_Id__c
+Text (18)
+ContentDocument ID of the final signed document — populated on full completion
+Initiated_By__c
+Lookup (User)
+HR Admin who triggered the signing workflow
+KT_Signer__c — Individual Signer Record
+Child of KT_Signature_Request__c. One record per signer per signature request. Tracks individual signing status, delegation, and audit data.
+Field API Name
+Type
+Description
+KT_Signature_Request__c
+Master-Detail (KT_Signature_Request__c)
+Parent signing workflow
+Signer_Name__c
+Text (255)
+Full name of the signer
+Signer_Email__c
+Email
+Email address where signing invitation is sent
+Signer_Role__c
+Picklist
+Onboardee / HR Admin / Hiring Manager / Legal Counsel / Compliance Officer
+Signing_Order__c
+Number
+Numeric order — lower numbers sign first in Sequential mode
+Status__c
+Picklist
+Pending / Invitation Sent / Viewed / Signed / Declined / Delegated / Expired
+Signed_At__c
+DateTime
+UTC timestamp when signature was captured
+IP_Address__c
+Text (45)
+IPv4 or IPv6 address captured at signing moment — legal audit evidence
+Device_User_Agent__c
+Text (255)
+Browser/device user agent string at signing — legal audit evidence
+Geolocation__c
+Geolocation
+Latitude/longitude if browser permission granted at signing
+Signature_Image_Id__c
+Text (18)
+ContentDocument ID of signature image (canvas PNG)
+Delegated_To__c
+Email
+Email of delegate if signer used delegation; populated on delegation action
+Delegation_Reason__c
+Text (255)
+Reason provided by original signer when delegating
+Reminder_Sent_At__c
+DateTime
+Timestamp of last reminder — used to throttle reminder frequency
+KT_Signature_Audit__c — Immutable Audit Record
+Created on every signature event. Immutable once created — provides the legal audit trail. Separate from KT_Signer__c to preserve integrity even if signer records are modified.
+Field API Name
+Type
+Description
+KT_Signer__c
+Lookup (KT_Signer__c)
+The signer record this audit event relates to
+KT_Signature_Request__c
+Lookup (KT_Signature_Request__c)
+The signature workflow
+Event_Type__c
+Picklist
+Invitation Sent / Document Viewed / Signature Captured / Signed / Delegated / Declined / Expired / Completed
+Event_Timestamp__c
+DateTime
+UTC timestamp of the event — system-set, not editable
+IP_Address__c
+Text (45)
+IP address at event time
+Device_User_Agent__c
+Text (255)
+Browser/device identifier
+Geolocation_Latitude__c
+Number (18,15)
+Latitude if geolocation was permitted
+Geolocation_Longitude__c
+Number (18,15)
+Longitude if geolocation was permitted
+Hash_Value__c
+Text (255)
+SHA-256 hash of (document content + signer email + timestamp) for tamper detection
+Session_Token__c
+Text (255)
+One-time session token used for this signing session — invalidated post-signature
+KT_OCR_Job__c — OCR Processing Job
+Tracks each OCR processing job submitted to the configured provider. Links the uploaded document to extracted data and HR review status.
+Field API Name
+Type
+Description
+KT_DocumentVault__c
+Master-Detail (KT_DocumentVault__c)
+Source document being OCR-processed
+KT_Onboarding__c
+Lookup (KT_Onboarding__c)
+Parent onboarding record
+OCR_Provider__c
+Picklist
+AWS Textract / Azure Form Recognizer — populated from active CMT at job creation
+Job_Id__c
+Text (255)
+Provider-assigned job/operation ID for async polling
+Status__c
+Picklist
+Submitted / Processing / Succeeded / Failed / Review Required / Accepted / Rejected
+Document_Type_Detected__c
+Text (255)
+Provider's classification of the document (e.g., 'Passport', 'Driver License')
+Extracted_JSON__c
+Long Text Area (131072)
+Raw JSON response from OCR provider — stored for debugging and reprocessing
+Extracted_Fields__c
+Long Text Area (32768)
+Structured key-value pairs post-mapping via KT_OCR_FieldMapping__mdt
+Confidence_Score__c
+Percent
+Overall confidence score returned by provider (0–100%)
+Review_Notes__c
+Text Area
+HR Admin notes when reviewing OCR results before acceptance
+Reviewed_By__c
+Lookup (User)
+HR Admin who accepted or rejected the OCR extraction
+Reviewed_At__c
+DateTime
+Timestamp of HR review decision
+Retry_Count__c
+Number
+Number of retry attempts — max 3 before creating manual review task
+KT_Bulk_Document_Job__c — Bulk Send Job Tracker
+Tracks bulk document generation and dispatch jobs. Provides per-record visibility into batch processing status for HR Ops teams managing large onboarding cohorts.
+Field API Name
+Type
+Description
+Job_Name__c
+Text (255)
+Human-readable name for the bulk job — e.g., 'Sept 2026 Graduate Intake — Offer Letters'
+Template__c
+Lookup (KT_DocumentTemplate__c)
+Document template used for this bulk job
+Total_Records__c
+Number
+Total number of onboarding records in the batch
+Processed__c
+Number
+Onboarding records processed so far (success or failure)
+Success_Count__c
+Number
+Documents successfully generated and dispatched
+Failure_Count__c
+Number
+Records that failed — details in KT_Bulk_Document_Error__c child records
+Status__c
+Picklist
+Queued / Running / Partially Complete / Complete / Failed
+Apex_Job_Id__c
+Text (18)
+Salesforce Batch Apex AsyncApexJob ID — for monitoring in Setup
+Initiated_By__c
+Lookup (User)
+HR Admin who triggered the bulk job
+Started_At__c
+DateTime
+When Batch Apex execution began
+Completed_At__c
+DateTime
+When all batches completed — null if still running
+4.2  Custom Metadata Types (CMT)
+All configuration is stored as Custom Metadata — upgrade-safe, deployable via Metadata API, and manageable in Salesforce Setup by admins without code changes.
+CMT API Name
+Purpose
+Key Fields
+KT_Document_Template_Config__mdt
+Maps domain + persona combinations to required document templates
+Domain_Code__c, Persona_Code__c, Template_API_Name__c, Is_Required__c, SLA_Days__c, Display_Order__c
+KT_OCR_FieldMapping__mdt
+Maps OCR provider response fields to KT Onboarding Salesforce fields per document type
+Document_Type__c, OCR_Provider__c, Provider_Field_Path__c, Target_Object__c, Target_Field__c, Confidence_Threshold__c
+KT_OCR_Provider_Config__mdt
+Active OCR provider configuration — switch between AWS Textract and Azure Form Recognizer without code changes
+Provider_Name__c, Named_Credential__c, Is_Active__c, Endpoint_Path__c, Async_Polling_Interval__c, Max_Retries__c
+KT_Signature_Config__mdt
+Per-domain e-signature settings including default provider, expiry days, and legal validity requirements
+Domain_Code__c, Default_Provider__c, Expiry_Days__c, Require_Geolocation__c, Require_IP__c, Legal_Notice_Text__c
+4.3  Object Relationship Diagram (Textual)
+Parent Object
+Relationship
+Child / Related Object
+KT_Onboarding__c
+Has Many (Master-Detail)
+KT_Document_Request__c
+KT_Onboarding__c
+Has Many (Master-Detail)
+KT_DocumentVault__c
+KT_DocumentTemplate__c
+Has Many (Lookup)
+KT_Document_Request__c
+KT_DocumentVault__c
+Has One (Master-Detail)
+KT_Signature_Request__c
+KT_DocumentVault__c
+Has One (Master-Detail)
+KT_OCR_Job__c
+KT_Signature_Request__c
+Has Many (Master-Detail)
+KT_Signer__c
+KT_Signer__c
+Has Many (Lookup)
+KT_Signature_Audit__c
+KT_Bulk_Document_Job__c
+Has Many (Master-Detail)
+KT_Bulk_Document_Error__c (error detail child)
+ContentDocument (Salesforce Files)
+Referenced by ID
+KT_DocumentVault__c, KT_DocumentTemplate__c, KT_Signer__c (signature image)
+5. Document Generation Engine
+5.1  KT_DocumentGeneratorService.cls — Core Service
+This Apex class is the single entry point for all document generation. It accepts a KT_Onboarding__c ID, a KT_DocumentTemplate__c ID (or auto-resolves from CMT), merges Salesforce data, and produces a ContentVersion.
+Method
+Signature
+Description
+generateDocument
+generateDocument(Id onboardingId, Id templateId): KT_DocGenResult
+Primary generation method. Loads template binary from ContentDocument, executes merge field substitution, creates ContentVersion, creates KT_DocumentVault__c entry. Returns result wrapper with vault entry ID and ContentDocument ID.
+generateFromDIE
+generateFromDIE(Id onboardingId): List&lt;KT_DocGenResult&gt;
+Auto-generates all documents required by DIE for the given onboarding record. Called by B1 DIE on record creation. Iterates KT_Document_Request__c records with Direction = Outbound.
+resolveMergeFields
+resolveMergeFields(String templateJson, Id onboardingId): String
+Replaces all {{FieldPath}} tokens in template with real Salesforce field values. Supports related object traversal up to 3 levels (e.g., {{KT_Onboarding__r.Contact__r.Account.Name}}).
+getPreviewData
+getPreviewData(Id templateId, Id onboardingId): Map&lt;String,String&gt;
+@AuraEnabled method called by ktDocumentPreview LWC. Returns merge field values for real-time preview without full generation.
+5.2  Merge Field Resolution
+Document templates use double-brace tokens (e.g., {{Contact.FirstName}}, {{KT_Onboarding__c.Start_Date__c}}) that the generator resolves at runtime. The merge map is stored in KT_DocumentTemplate__c.Merge_Field_Map__c as JSON.
+Merge Category
+Example Tokens
+Source Object
+Onboardee Personal
+{{Contact.FirstName}}, {{Contact.LastName}}, {{Contact.Email}}, {{Contact.Phone}}
+Contact (linked to KT_Onboarding__c)
+Onboarding Record
+{{KT_Onboarding__c.Start_Date__c}}, {{KT_Onboarding__c.Job_Title__c}}, {{KT_Onboarding__c.Department__c}}
+KT_Onboarding__c
+Company / Employer
+{{Account.Name}}, {{Account.BillingAddress}}, {{Account.Phone}}
+Account (linked to KT_Onboarding__c)
+Manager
+{{Manager__r.Name}}, {{Manager__r.Email}}, {{Manager__r.Title}}
+User (Hiring_Manager__c lookup on KT_Onboarding__c)
+Dynamic Date
+{{TODAY}}, {{TODAY+30}}, {{TODAY+90}}
+System-generated at runtime — supports offset arithmetic
+Compliance
+{{Compliance_Profile__c}}, {{Regulatory_Framework__c}}
+KT_Onboarding__c and KT_Persona__mdt
+Custom Fields
+{{KT_Onboarding__c.Custom_Field_API_Name__c}}
+Any field on KT_Onboarding__c or related objects — extensible
+5.3  ktDocumentPreview LWC
+Real-time document preview component that shows HR admins a live preview of a generated document with merge fields substituted before committing to full generation.
+Property / Method
+Type
+Description
+@api onboardingId
+String
+ID of the KT_Onboarding__c record — passed from parent component or record page
+@api templateId
+String
+ID of the selected KT_DocumentTemplate__c
+@wire getPreviewData
+Wire Adapter
+Calls KT_DocumentGeneratorService.getPreviewData() to fetch resolved merge field values
+handleGenerate()
+JS Handler
+Calls KT_DocumentGeneratorService.generateDocument() via Apex @AuraEnabled; navigates to vault entry on success
+handleTemplateChange(event)
+JS Handler
+Fires on template picker selection change; re-fetches preview data for new template
+Preview Panel
+HTML Template
+Renders a styled HTML representation of the document with merge fields highlighted; shows unresolved tokens in red for HR visibility
+5.4  Screen Flow — Document Generation Wizard
+For HR admins generating multiple documents or performing bulk operations, a guided Screen Flow provides a step-by-step experience replacing all OmniScript forms.
+Flow Screen
+Inputs / Actions
+Outcome
+Screen 1: Select Templates
+HR sees auto-suggested templates from DIE; can add/remove; sees required vs. optional classification
+Stores template selection list in Flow variable
+Screen 2: Verify Merge Data
+Shows ktDocumentPreview LWC for each selected template; HR reviews and confirms merge data accuracy
+Confirms generation parameters
+Screen 3: Configure Signatures
+For templates requiring signature: HR enters signer emails, selects signing order (sequential/parallel), sets expiry date
+Stores signature config in Flow variable
+Screen 4: Confirm & Generate
+Summary screen with document count, signer count, estimated completion time; Generate button triggers Apex action
+Invokes KT_DocumentGeneratorService and KT_ESignatureOrchestrator; shows progress spinner
+Screen 5: Completion
+Success: shows links to generated documents in vault. Error: shows per-document failure reasons with retry option
+Navigation to KT_DocumentVault__c list view
+6. KT Sign & E-Signature Orchestration
+6.1  KT Sign — Native E-Signature (ktSignaturePad LWC)
+KT Sign is the native electronic signature capability built directly into the platform — no third-party e-signature service required for standard use cases. It renders within the Experience Cloud portal and internal Salesforce pages.
+Capability
+Implementation Detail
+Signature Capture
+HTML5 Canvas-based signature pad rendered via ktSignaturePad LWC. Supports mouse, touch (iOS/Android), and stylus input. Renders at 2x pixel density on retina displays.
+Legal Validity Data
+On signature submission: UTC timestamp captured server-side via Apex (not client-side to prevent manipulation); IP address captured via Apex HttpServletRequest equivalent (VF page wrapper for IP) or Experience Cloud session; device user agent from request headers; geolocation latitude/longitude from browser Geolocation API (user prompt; non-blocking if declined).
+Signature Storage
+Canvas PNG exported as base64; decoded and stored as ContentVersion (VersionData Blob) encrypted at rest via Shield Platform Encryption. ContentDocument linked to KT_Signer__c.Signature_Image_Id__c.
+Audit Trail
+KT_Signature_Audit__c record created immediately on signature capture — immutable (no update/delete sharing rules; audit object protected in managed package). SHA-256 hash of (document content hash + signer email + UTC timestamp) stored in Hash_Value__c for tamper detection.
+Session Token
+One-time JWT session token issued when signer opens signing URL. Token consumed on first use; stored (hashed) in KT_Signer__c.Session_Token__c. Replaying the URL after signing returns an 'Already Signed' error page.
+Legal Notice
+Configurable legal notice text displayed above signature pad — sourced from KT_Signature_Config__mdt.Legal_Notice_Text__c. Signer must check an 'I agree to sign electronically' checkbox (checkbox state also captured in audit record).
+6.2  KT_ESignatureOrchestrator.cls — Multi-Party Workflow Engine
+Method
+Description
+initiateSigningWorkflow(Id vaultId, SignatureConfig config)
+Creates KT_Signature_Request__c; creates KT_Signer__c records per signer; publishes Platform Event to trigger first invitation dispatch. Config includes signing order, signer list, expiry, provider selection.
+dispatchNextInvitation(Id signatureRequestId)
+Called by Platform Event handler and by completion callbacks. For Sequential mode: dispatches invitation only when previous signer has signed. For Parallel: dispatches all simultaneously.
+handleSignatureComplete(Id signerId, SignaturePayload payload)
+@InvocableMethod called by Experience Cloud post-signature. Stores signature data, creates KT_Signature_Audit__c, updates KT_Signer__c status, calls dispatchNextInvitation or completeWorkflow.
+handleDelegation(Id signerId, String delegateEmail, String reason)
+Creates new KT_Signer__c for delegate; updates original signer status to Delegated; dispatches invitation to delegate; logs delegation event in KT_Signature_Audit__c.
+completeWorkflow(Id signatureRequestId)
+Called when all signers have signed. Assembles final signed document (with all signature pages); creates completed ContentVersion; updates KT_DocumentVault__c status; fires Platform Event for downstream B6 compliance update.
+handleExpiryEscalation(Id signatureRequestId)
+Called by Scheduled Flow. Notifies HR of unsigned/expired requests; creates escalation task; optionally resends invitation depending on retry config in KT_Signature_Config__mdt.
+6.3  DocuSign Add-On Integration
+For organizations with existing DocuSign agreements, the DocuSign connector replaces KT Sign for document dispatch while maintaining the same KT_Signature_Request__c and KT_Signer__c data model.
+Step
+Action
+Technology
+1. Envelope Creation
+KT_DocuSignConnector.cls calls DocuSign eSign REST API /envelopes endpoint via Named Credential KT_DocuSign_NC. Document from ContentDocument base64-encoded in request body.
+Apex HttpCallout + Named Credential
+2. Signer Tab Placement
+Signer tabs (signature, date, initials) placed via DocuSign tabs API based on KT_DocumentTemplate__c signer configuration.
+Apex HttpCallout
+3. Status Webhook
+DocuSign Connect webhook registered on envelope creation. Inbound REST endpoint KT_DocuSignWebhookHandler accepts status updates (sent/delivered/completed/declined).
+Apex REST Resource (@RestResource)
+4. Completion Callback
+On 'completed' webhook: completed document binary retrieved from DocuSign API, stored as new ContentVersion, KT_DocumentVault__c updated.
+Apex HttpCallout + ContentVersion insert
+5. Data Consistency
+Regardless of provider (KT Sign or DocuSign), KT_Signer__c and KT_Signature_Audit__c records are always populated for consistent reporting.
+KT_ESignatureOrchestrator.cls
+6.4  Salesforce Flows for E-Signature Automation
+Flow Name
+Type
+Trigger / Schedule
+Purpose
+KT_ESignature_Expiry_Check
+Scheduled Flow
+Daily at 08:00 org timezone
+Queries KT_Signature_Request__c where Status = In Progress AND Expiry_Date &lt;= TODAY(). Calls KT_ESignatureOrchestrator.handleExpiryEscalation() for each.
+KT_ESignature_Reminder
+Scheduled Flow
+Daily at 09:00 org timezone
+Queries KT_Signer__c where Status = Invitation Sent AND Reminder_Sent_At &lt; LAST_N_DAYS:2. Sends reminder email via Email Alert and increments Reminder_Sent_At.
+KT_DocumentRequest_Reminder
+Scheduled Flow
+Daily at 08:30 org timezone
+Queries KT_Document_Request__c where Status = Not Started AND Due_Date &lt;= TODAY+3 AND Reminder_Count &lt; 3. Sends reminder to onboardee via portal notification + email.
+KT_DocumentVault_StatusSync
+Record-Triggered Flow
+On KT_Signer__c update where Status changed to Signed
+Checks if all KT_Signer__c for parent KT_Signature_Request__c are Signed. If yes: updates KT_DocumentVault__c and KT_Document_Request__c to Complete.
+7. OCR Document Ingestion Pipeline
+The OCR pipeline converts uploaded identity documents, qualification certificates, and compliance documents into structured Salesforce data — eliminating manual data re-entry by HR teams.
+🔄  Provider-Agnostic Design
+B4 supports two OCR providers — AWS Textract and Azure Form Recognizer — switchable via KT_OCR_Provider_Config__mdt without code changes. The active provider is resolved at runtime by KT_OcrIngestionService.cls. Organizations can configure their preferred provider during installation or switch providers via the KT Setup Assistant LWC.
+7.1  OCR Processing Architecture — No OmniStudio
+All OCR orchestration uses Apex + Platform Events + Record-Triggered Flow (replacing any OmniScript/Integration Procedure approach):
+Step
+Component
+Technology
+Detail
+1. Upload
+ktDocumentUpload LWC (B7 Portal)
+LWC + ContentDocument API
+Onboardee or HR uploads document. ContentVersion created. Platform Event KT_Document_Uploaded__e published with ContentDocumentId, OnboardingId, DocumentType.
+2. Event Dispatch
+KT_Document_Uploaded__e handler
+Platform Event Triggered Flow
+Flow subscribes to KT_Document_Uploaded__e. If DocumentType requires OCR (per KT_Document_Template_Config__mdt.Requires_OCR__c): creates KT_OCR_Job__c, calls KT_OcrIngestionService.submitJob() via Apex Action.
+3. Provider Resolution
+KT_OcrIngestionService.cls
+Apex
+Queries KT_OCR_Provider_Config__mdt for active provider. Retrieves Named Credential. Determines provider-specific API endpoint and payload format.
+4. AWS Textract Path
+KT_OcrIngestionService.submitToTextract()
+Apex HttpCallout via KT_AWS_Textract_NC
+POST to Textract AnalyzeDocument API (synchronous for documents &lt; 10 pages) or StartDocumentAnalysis (async). Stores Job_Id__c for async polling.
+5. Azure Form Recognizer Path
+KT_OcrIngestionService.submitToAzure()
+Apex HttpCallout via KT_Azure_FormRecognizer_NC
+POST to Azure Form Recognizer /analyze endpoint (always async). Returns Operation-Location URL stored in Job_Id__c for result polling.
+6. Async Polling
+KT_OcrPollingBatch.cls
+Apex Queueable (chained)
+Polls provider for job completion every 5 seconds (max 12 attempts = 60 seconds). On success: calls parseAndMap(). On max retries: marks OCR_Status__c = Failed, creates manual review task.
+7. Field Mapping
+KT_OcrIngestionService.parseAndMap()
+Apex
+Maps raw JSON response fields to KT Onboarding fields using KT_OCR_FieldMapping__mdt records for the detected document type and active provider. Stores mapped fields in KT_OCR_Job__c.Extracted_Fields__c.
+8. HR Review
+ktOCRReview LWC
+LWC + @AuraEnabled Apex
+HR Admin sees extracted fields side-by-side with current record values. Field-by-field accept/reject. Confidence score colour-coded (green ≥90%, amber 70–89%, red &lt;70%). One-click 'Accept All High Confidence' shortcut.
+9. Write to Record
+KT_OcrIngestionService.applyExtraction()
+Apex
+On HR acceptance: iterates accepted fields, updates KT_Onboarding__c (or related Contact) via dynamic DML. Immutably logs accepted fields in KT_OCR_Job__c.Reviewed_By__c and Reviewed_At__c.
+10. Agentforce Review
+KT HR Copilot Agent
+Agentforce
+After extraction: Copilot compares extracted values against existing record data. Flags discrepancies (e.g., extracted DOB differs from Contact.Birthdate). Posts alert to HR via in-app notification.
+7.2  AWS Textract vs Azure Form Recognizer — Comparison
+Dimension
+AWS Textract
+Azure Form Recognizer
+Named Credential
+KT_AWS_Textract_NC
+KT_Azure_FormRecognizer_NC
+API Pattern
+Synchronous (AnalyzeDocument) for &lt;10 pages; Async (StartDocumentAnalysis) for larger
+Always async: POST → poll Operation-Location URL
+Document Type Support
+Tables, forms, key-value pairs, signatures, identity documents (Analyze Identity)
+Pre-built models: ID document, invoice, receipt, W-2; custom model training available
+Confidence Scores
+Per-field confidence (0–1.0) returned in BlockType responses
+Per-field confidence (0.0–1.0) returned in analyzeResult
+ID Document Support
+Built-in: Passport, Driver's License — 60+ countries
+Built-in ID Document model: Passport, Driver's License — 195+ countries
+Custom Model Training
+Custom adapter model training via Textract console
+Custom neural model training via Azure portal or API
+Pricing Model
+Per page analyzed — varies by feature (forms vs. tables vs. IDs)
+Per page analyzed — varies by model type
+Salesforce Callout
+Single synchronous POST or start-then-poll pattern
+Start-then-poll pattern always
+Selection Recommendation
+Preferred for organizations already in AWS ecosystem
+Preferred for organizations in Microsoft/Azure ecosystem (common with Entra ID orgs)
+7.3  KT_OCR_FieldMapping__mdt — Configuration Reference
+Field mappings define how OCR provider response paths translate to Salesforce fields. HR Admins can add custom mappings via Salesforce Setup — no code change required.
+Field
+Example Value (AWS Textract / Passport)
+Description
+Document_Type__c
+Passport
+OCR provider's detected document type label
+OCR_Provider__c
+AWS Textract
+Provider this mapping applies to
+Provider_Field_Path__c
+LAST_NAME
+JSON path or key in provider response (Textract key name or Azure field name)
+Target_Object__c
+Contact
+Salesforce object to write the value to
+Target_Field__c
+LastName
+API name of Salesforce field to populate
+Confidence_Threshold__c
+85
+Minimum confidence % to auto-flag for acceptance (below = red in review UI)
+Transform_Function__c
+UPPERCASE
+Optional: UPPERCASE / TITLECASE / DATE_FORMAT / NONE — applied before writing
+8. Document Vault — KT_DocumentVault__c
+8.1  Vault Architecture
+The document vault is a structured index layer on top of Salesforce Files (ContentDocument/ContentVersion). It provides enhanced metadata, access control, expiry tracking, and compliance tagging beyond native Salesforce Files capabilities.
+Vault Capability
+Implementation
+Per-Onboardee Scoping
+All KT_DocumentVault__c records are Master-Detail children of KT_Onboarding__c. Vault is automatically scoped to the onboarding record — no cross-onboardee document visibility.
+Document Versioning
+Each document re-upload creates a new ContentVersion linked to the same ContentDocument. Version_Number__c on KT_DocumentVault__c increments. Previous versions accessible via ContentVersion SOQL with IsLatest = false.
+Access Control
+KT_Admin and KT_HR_User can view all vault entries. KT_Manager can view documents for their onboardees only (sharing rules based on Onboarding__r.Hiring_Manager__c). KT_Onboardee (Experience Cloud user) can view only their own documents, filtered by Document_Type__c visibility rules in CMT.
+Expiry Tracking
+Is_Expired__c formula field drives a Scheduled Flow (KT_Document_Expiry_Alert) that creates tasks and sends email notifications 30/60/90 days before expiry. B6 Compliance Engine reads expiry status for compliance score calculation.
+Audit Immutability
+Shield Field Audit Trail configured on Status__c, Signature_Status__c, and OCR_Status__c fields with 10-year retention for regulated industries.
+Virus Scanning
+Uploaded documents scanned via configured security partner API (ClamAV-compatible endpoint) before ContentVersion is created. Files failing scan are quarantined (not deleted) and HR alerted.
+8.2  ktDocumentVault LWC — HR Interface
+Component Feature
+Description
+Vault Grid View
+Card-based document grid per onboardee. Documents grouped by Document_Type__c category with collapsible sections. Status badges (Pending / Signed / Verified / Expired) colour-coded.
+Document Preview
+PDF documents preview inline using PDF.js (loaded from Static Resource). DOCX files trigger download. Images display inline.
+Version History Panel
+Side panel shows all ContentVersion records for a document. HR can restore a previous version or compare versions.
+Upload Action
+Drag-and-drop or file picker upload. File type validation (PDF/JPG/PNG/DOCX only; configurable via CMT). Max file size 25MB (Salesforce Files limit). Triggers OCR pipeline automatically if document type requires it.
+Quick Actions
+Per-document actions: Preview, Download, Request Signature, Trigger OCR, Waive, Archive. Waive requires justification text input (minimum 20 characters).
+Checklist Completion Bar
+Progress bar showing X of Y required documents complete. Missing required documents highlighted in red. Drives onboarding stage gate enforcement.
+8.3  ktDocumentVaultPortal LWC — Onboardee Portal Interface (B7)
+A simplified, mobile-first variant of the vault UI rendered in the Experience Cloud portal. Designed for onboardees — limited to their own documents, with guided upload flows.
+Feature
+Description
+Onboardee Checklist View
+Shows required documents as a checklist. Each item shows status (To Do / Uploaded / Signed / Approved). Tapping an item opens upload flow or signing link.
+Guided Upload Screen Flow
+Step-by-step Screen Flow guides onboardees through document upload: select document type → upload file → confirm details → submit. Replaces OmniScript entirely.
+Status Transparency
+Onboardees can see real-time status of each document (Pending HR Review, Verified, More Info Needed). HR can post a short note visible to the onboardee per document.
+Mobile-First Design
+Full PWA offline support for checklist viewing. Upload requires connectivity. Touch-optimized UI with large tap targets and thumb-zone navigation.
+9. Bulk Document Processing
+9.1  KT_BulkDocumentBatch.cls — Architecture
+The bulk processing engine enables HR teams to dispatch documents to large onboarding cohorts (e.g., graduate intake classes, seasonal retail hiring waves) without manual intervention.
+Component
+Description
+KT_BulkDocumentBatch.cls
+Apex Batch class implementing Database.Batchable&lt;SObject&gt; and Database.AllowsCallouts. Batch size 25 records (conservative to stay within callout governor limits). Each execute() generates documents and dispatches e-signature invitations for a chunk of onboarding records.
+KT_BulkDocumentQueueable.cls
+Queueable Apex class chained from the batch for post-processing tasks: updating KT_Bulk_Document_Job__c counters, publishing Platform Events for Data Cloud streaming, and triggering Agentforce HR Copilot notification on job completion.
+KT_BulkDocumentJobService.cls
+Service class providing @AuraEnabled methods for the bulk send Screen Flow: validateCohort() checks all target records for merge field completeness before job starts; getBulkJobStatus() provides real-time progress for the monitoring LWC.
+ktBulkDocumentMonitor LWC
+Real-time job monitoring dashboard. Shows progress bar (processed/total), success/failure counts, estimated completion time, and per-record error details. Auto-refreshes every 10 seconds using Lightning Refresh API.
+9.2  Bulk Send Screen Flow — HR Wizard
+Screen
+Description
+Screen 1: Select Cohort
+HR selects target onboarding records via list view filter, date range, or cohort tag (KT_Onboarding__c.Cohort__c field). Count displayed. Maximum 10,000 records per job.
+Screen 2: Select Template
+HR selects document template from active library. Preview shown with sample merge data from first record in cohort.
+Screen 3: Pre-flight Validation
+Calls KT_BulkDocumentJobService.validateCohort() — identifies records with missing merge data. HR can exclude flagged records or proceed with available data.
+Screen 4: Signature Config
+If template requires signature: HR configures signing settings applied uniformly to all records in cohort (provider, expiry, signing order).
+Screen 5: Launch
+KT_Bulk_Document_Job__c created; KT_BulkDocumentBatch.execute() scheduled via Database.executeBatch(). HR redirected to ktBulkDocumentMonitor LWC.
+9.3  Governor Limit Strategy
+Governor Limit
+Risk
+Mitigation Strategy
+Callout limit (100/transaction)
+Document generation with external e-sign API calls per batch chunk
+Batch size 25 records max per execute(); each record = max 2 callouts (generate + dispatch). Well within 100 limit.
+CPU time (60s/transaction)
+Large DOCX template binary processing and merge field resolution
+Template binary loaded once per execute() from Static Resource or ContentDocument cache. Merge resolution uses indexed SOQL with LIMIT.
+Heap size (12MB)
+Large document binaries in memory during generation
+Documents processed and written to ContentVersion one at a time within execute(). Batch size kept at 25 to prevent heap accumulation.
+Async Apex queue (250 jobs)
+Queueable chaining for large cohorts
+Each batch chunk chains a single Queueable for post-processing. Batch completes all generation work; Queueable only handles lightweight status updates.
+DML rows (10,000/transaction)
+Creating KT_DocumentVault__c, KT_Document_Request__c updates, ContentVersion inserts
+Batch size 25 × max 4 DML rows per record = 100 DML rows per execute(). Well within limits.
+10. Integration Architecture
+10.1  Named Credentials Reference
+Named Credential
+External System
+Auth Method
+Used By
+KT_DocuSign_NC
+DocuSign eSign REST API
+OAuth 2.0 JWT Bearer Token
+KT_DocuSignConnector.cls — envelope creation, status, document retrieval
+KT_AdobeSign_NC
+Adobe Acrobat Sign REST API
+OAuth 2.0 Auth Code
+KT_AdobeSignConnector.cls (Sprint 8 add-on)
+KT_AWS_Textract_NC
+AWS Textract API (us-east-1 or configured region)
+AWS Signature V4 (Access Key / Secret in Named Credential)
+KT_OcrIngestionService.submitToTextract()
+KT_Azure_FormRecognizer_NC
+Azure Cognitive Services Form Recognizer endpoint
+API Key (Ocp-Apim-Subscription-Key header)
+KT_OcrIngestionService.submitToAzure()
+KT_VirusScan_NC
+Configurable virus scan endpoint (ClamAV REST or commercial)
+API Key
+KT_VirusScanService.cls — called on document upload before ContentVersion creation
+10.2  Platform Events — B4 Event Catalog
+Platform Event
+Published By
+Subscribed By
+Payload Fields
+KT_Document_Uploaded__e
+ktDocumentUpload LWC (via Apex publish)
+Record-Triggered Flow → Apex Action (OCR pipeline)
+ContentDocumentId__c, OnboardingId__c, DocumentType__c, UploadedBy__c, Timestamp__c
+KT_Document_Generated__e
+KT_DocumentGeneratorService.cls
+Data Cloud streaming ingestion; B6 Compliance Engine flow
+VaultId__c, OnboardingId__c, TemplateId__c, DocumentType__c, Timestamp__c
+KT_Signature_Complete__e
+KT_ESignatureOrchestrator.completeWorkflow()
+B6 Compliance Engine flow; Data Cloud; B10 Analytics dataset refresh
+SignatureRequestId__c, OnboardingId__c, DocumentId__c, CompletedAt__c, AllSignersSigned__c
+KT_OCR_Job_Complete__e
+KT_OcrIngestionService.parseAndMap()
+Record-Triggered Flow → Update KT_DocumentVault__c.OCR_Status__c; Agentforce HR Copilot action
+OcrJobId__c, OnboardingId__c, Status__c, DocumentType__c, ConfidenceScore__c
+10.3  Inbound Webhook Handlers (Apex REST)
+Endpoint
+Class
+Caller
+Description
+/services/apexrest/kt/v1/docusign/webhook
+KT_DocuSignWebhookHandler.cls (@RestResource)
+DocuSign Connect
+Receives envelope status updates (sent/delivered/signed/completed/declined). Correlates via External_Envelope_Id__c. Updates KT_Signer__c and KT_DocumentVault__c.
+/services/apexrest/kt/v1/adobesign/webhook
+KT_AdobeSignWebhookHandler.cls (@RestResource)
+Adobe Sign Webhooks
+Receives agreement status events. Same processing pattern as DocuSign handler.
+/services/apexrest/kt/v1/ocr/callback
+KT_OcrCallbackHandler.cls (@RestResource)
+AWS Textract / Azure (async)
+Receives async OCR completion notification. Triggers result retrieval and field mapping.
+11. Agentforce & AI Integration
+11.1  KT HR Copilot — B4 Actions
+Action Name
+Trigger
+Agent Behaviour
+Detect OCR Discrepancy
+KT_OCR_Job_Complete__e event received by agent
+Compares extracted field values in KT_OCR_Job__c.Extracted_Fields__c against existing Contact and KT_Onboarding__c field values. Flags discrepancies with explanation. Posts structured alert to HR via in-app notification: 'OCR extracted DOB 15-Jun-1985 but Contact record shows 16-Jun-1985 — please review.'
+Document Gap Analysis
+HR Admin asks: 'What documents are missing for [Name]?'
+Queries KT_Document_Request__c for onboarding record. Lists incomplete required documents, overdue reminders, and waived documents with reasons. Suggests next actions.
+Bulk Job Status Summary
+HR Admin asks: 'How is the September intake document send going?'
+Queries KT_Bulk_Document_Job__c for recent jobs. Returns completion percentage, failure count with failure reason summary, and estimated finish time.
+Signing Escalation Alert
+KT_Signature_Request__c approaching expiry (Scheduled Flow triggers agent action)
+Generates escalation notification for HR: lists unsigned documents by signer name and days to expiry. Suggests delegation or manual follow-up.
+11.2  KT Compliance Auditor — B4 Actions
+Action
+Description
+Missing Compliance Documents
+Agent cross-references KT_DocumentVault__c completeness against KT_Compliance_Rule__mdt requirements for the onboardee's domain, persona, and location. Reports which regulatory framework documents are outstanding.
+Expiring Document Alert
+Scans KT_DocumentVault__c where Expiry_Date__c is within 30/60/90 days. Generates per-onboardee expiry report for compliance officer review. Integrated with B6 compliance dashboard.
+Audit Report Generation
+On demand: generates a structured compliance document vault report per onboardee — lists all documents, status, signature dates, OCR verification status — formatted as a downloadable PDF via B4 Document Generator.
+11.3  Einstein Trust Layer Compliance
+Concern
+Mitigation
+PII in OCR data passed to LLM
+Einstein Trust Layer enforces PII masking before OCR-extracted data is included in Agentforce prompt context. Passport numbers, government IDs, and dates of birth are masked with [REDACTED] in prompt grounding.
+Document content in LLM prompts
+Document binary content is never passed to Agentforce. Only structured field values from KT_OCR_Job__c.Extracted_Fields__c (post-mapping, pre-write) are used for discrepancy comparison prompts.
+Audit trail for AI interactions
+All Agentforce interactions logged in Einstein Trust Layer audit log. KT_Signature_Audit__c and KT_OCR_Job__c records note when Agentforce review was triggered and by which agent.
+12. Security Architecture
+12.1  Data Protection
+Control
+Implementation
+Shield Platform Encryption
+Applied to: KT_Signer__c.IP_Address__c, KT_Signer__c.Geolocation, KT_OCR_Job__c.Extracted_JSON__c, KT_DocumentVault__c fields containing PII references. Customer-managed encryption keys (BYOK) available in Ultra tier.
+Field Audit Trail
+10-year field history on: KT_DocumentVault__c.Status__c, KT_Signature_Request__c.Status__c, KT_OCR_Job__c.Status__c, KT_Signer__c.Status__c. Mandatory for SOX and HIPAA regulated customers.
+Event Monitoring
+All vault access, document downloads, OCR job submissions, and signature captures logged via Salesforce Event Monitoring. Exportable to SIEM tools (Splunk, Sumo Logic) via Event Log File API.
+Document Encryption at Rest
+ContentVersion.VersionData stored encrypted at rest via Salesforce Shield. Signature image ContentVersions encrypted with the same shield key as onboardee PII.
+Virus Scanning
+All uploaded documents passed through KT_VirusScanService.cls before ContentVersion creation. Files failing scan quarantined in KT_DocumentVault__c with Status__c = Quarantined; HR alerted immediately.
+12.2  Access Control — Permission Set Summary
+Permission Set
+B4 Object Access
+KT_Admin
+Full CRUD on all B4 objects. Manage document templates. Configure OCR mappings. Trigger bulk jobs. Access all vault entries.
+KT_HR_User
+Create/Read/Edit KT_Document_Request__c, KT_DocumentVault__c, KT_Signature_Request__c, KT_Signer__c. Read KT_Signature_Audit__c. No delete on audit objects.
+KT_Compliance_Officer
+Read-only on all B4 objects. Generate audit-ready reports. Access compliance document vault views. Cannot modify document or signature records.
+KT_Manager
+Read KT_Document_Request__c and KT_DocumentVault__c for own team onboardees only (sharing rules). No access to OCR job records or bulk processing.
+KT_Onboardee (Experience Cloud)
+Read own KT_Document_Request__c (status only). Upload documents (creates ContentVersion + KT_DocumentVault__c via Apex guest context). Read own vault entries filtered by visibility rules. No access to any other onboardee's data.
+12.3  AppExchange Security Review Compliance
+All SOQL queries in B4 Apex classes use WITH SHARING and bind variable parameters — no SOQL injection vectors
+Named Credentials used for all external callouts — no credentials in Apex, no credentials in Custom Metadata
+All LWC components use Salesforce framework auto-escaping — no innerHTML assignment in JavaScript
+Apex REST handlers (webhook receivers) validate inbound payload signatures (HMAC-SHA256) before processing
+OCR provider API keys stored exclusively in Named Credentials — not in Custom Metadata or Static Resources
+Virus scan executed before ContentVersion DML insert — no unscanned files enter the org
+KT_Signature_Audit__c protected by managed package sharing rules — no delete access for any permission set including KT_Admin
+13. Headless 360 Upgrades
+13.1  MCP Tools — B4 Exposure
+MCP Tool
+Sprint
+Description
+kt_upload_document
+Sprint 7
+Any external agent can trigger document ingestion for a given onboarding record. Input: onboardingId, documentType, ContentDocumentId. Output: vaultEntryId, ocrJobId (if triggered).
+kt_get_document_vault
+Sprint 7
+Returns structured vault contents for an onboarding record. Output: array of {documentName, documentType, status, signatureStatus, expiryDate}.
+kt_dispatch_signing
+Sprint 7
+Triggers e-signature workflow for a given document vault entry. Input: vaultId, signerList, signingOrder, expiryDays. Output: signatureRequestId.
+13.2  AXL & AgentExchange Upgrades (Sprint 8)
+AXL signing tiles: KT_Signature_Request__c signing pending state rendered as interactive Slack/Teams card — signer taps card to open mobile signing flow
+DocuSign AgentExchange MCP connector replaces custom DocuSign Named Credential integration — leverages first-class DocuSign MCP tool from AgentExchange marketplace
+Trusted Agent Identity: high-value signatures (SOX conflict of interest disclosures, HIPAA authorizations) require mobile-push biometric confirmation before KT_ESignatureOrchestrator.completeWorkflow() proceeds
+14. Sprint Plan — Full Task Breakdown
+All B4 development tasks mapped to sprints in alignment with the KT Onboarding Enterprise Sprint Plan (Sprints 1–9).
+Task ID
+Task Description
+Priority
+Sprint
+Tech Layer
+B4-T01
+Create KT_Document_Request__c object with all fields defined in Section 4.1
+P0
+Sprint 1
+Salesforce Objects
+B4-T02
+Create KT_DocumentTemplate__c object with all fields including Merge_Field_Map__c JSON
+P0
+Sprint 1
+Salesforce Objects
+B4-T03
+Create KT_DocumentVault__c object — master-detail to KT_Onboarding__c
+P0
+Sprint 1
+Salesforce Objects
+B4-T04
+Create KT_Signature_Request__c, KT_Signer__c, KT_Signature_Audit__c objects
+P0
+Sprint 1
+Salesforce Objects
+B4-T05
+Create KT_OCR_Job__c and KT_Bulk_Document_Job__c objects
+P0
+Sprint 1
+Salesforce Objects
+B4-T06
+Create KT_Document_Template_Config__mdt — domain/persona to template mapping
+P0
+Sprint 1
+Custom Metadata
+B4-T07
+Create KT_OCR_Provider_Config__mdt — provider-agnostic OCR config
+P0
+Sprint 1
+Custom Metadata
+B4-T08
+Create KT_OCR_FieldMapping__mdt — provider field to Salesforce field mapping
+P0
+Sprint 1
+Custom Metadata
+B4-T09
+Create KT_Signature_Config__mdt — per-domain signing settings
+P1
+Sprint 1
+Custom Metadata
+B4-T10
+Configure Named Credentials: KT_DocuSign_NC, KT_AWS_Textract_NC, KT_Azure_FormRecognizer_NC, KT_VirusScan_NC
+P0
+Sprint 1
+Named Credentials
+B4-T11
+Build KT_DocumentGeneratorService.cls — generateDocument(), resolveMergeFields(), getPreviewData()
+P0
+Sprint 4
+Apex
+B4-T12
+Build KT_DocumentChecklistService.cls — called by DIE to create KT_Document_Request__c records on onboarding creation
+P0
+Sprint 4
+Apex
+B4-T13
+Build ktDocumentPreview LWC — real-time preview with merge field substitution and unresolved field highlighting
+P1
+Sprint 4
+LWC
+B4-T14
+Build Screen Flow: Document Generation Wizard (5 screens as per Section 5.4)
+P0
+Sprint 4
+Salesforce Screen Flow
+B4-T15
+Build ktSignaturePad LWC — HTML5 canvas signature, touch/stylus support, legal notice, session token validation
+P0
+Sprint 4
+LWC
+B4-T16
+Build KT_ESignatureOrchestrator.cls — all methods per Section 6.2
+P0
+Sprint 4
+Apex
+B4-T17
+Build ktESignatureConfig LWC — signing order configuration, signer role assignment, expiry input
+P1
+Sprint 4
+LWC
+B4-T18
+Build KT_DocuSignConnector.cls — envelope creation, tab placement, webhook registration
+P1
+Sprint 4
+Apex + Named Credential
+B4-T19
+Build KT_DocuSignWebhookHandler.cls — Apex REST @RestResource for DocuSign Connect callbacks
+P1
+Sprint 4
+Apex REST
+B4-T20
+Build KT_ESignatureService.cls — IP capture wrapper, geolocation collection, signature hash generation
+P0
+Sprint 4
+Apex
+B4-T21
+Build ktDocumentVault LWC — HR vault grid, version history, quick actions, checklist completion bar
+P0
+Sprint 4
+LWC
+B4-T22
+Build ktDocumentVaultPortal LWC — onboardee portal variant, mobile-first, guided upload Screen Flow
+P0
+Sprint 4
+LWC + Screen Flow
+B4-T23
+Build KT_BulkDocumentBatch.cls + KT_BulkDocumentQueueable.cls — governor limit safe bulk generation
+P1
+Sprint 4
+Apex Batch + Queueable
+B4-T24
+Build ktBulkDocumentMonitor LWC — real-time job progress dashboard with auto-refresh
+P1
+Sprint 4
+LWC
+B4-T25
+Build Screen Flow: Bulk Send Wizard (5 screens per Section 9.2)
+P1
+Sprint 4
+Salesforce Screen Flow
+B4-T26
+Build Scheduled Flow: KT_ESignature_Expiry_Check (daily, triggers handleExpiryEscalation)
+P1
+Sprint 4
+Salesforce Scheduled Flow
+B4-T27
+Build Scheduled Flow: KT_ESignature_Reminder (daily, reminder emails to pending signers)
+P1
+Sprint 4
+Salesforce Scheduled Flow
+B4-T28
+Build Scheduled Flow: KT_DocumentRequest_Reminder (daily, portal + email reminders for missing docs)
+P1
+Sprint 4
+Salesforce Scheduled Flow
+B4-T29
+Build Record-Triggered Flow: KT_DocumentVault_StatusSync (on KT_Signer__c update, cascade to vault/request)
+P0
+Sprint 4
+Salesforce Flow
+B4-T30
+Publish Platform Events: KT_Document_Uploaded__e, KT_Document_Generated__e, KT_Signature_Complete__e
+P0
+Sprint 4
+Platform Events
+B4-T31
+Build KT_OcrIngestionService.cls — submitJob(), submitToTextract(), submitToAzure(), parseAndMap(), applyExtraction()
+P1
+Sprint 6
+Apex
+B4-T32
+Build KT_OcrPollingBatch.cls (Queueable) — async polling with max retry and failure handling
+P1
+Sprint 6
+Apex Queueable
+B4-T33
+Build KT_OcrCallbackHandler.cls — Apex REST @RestResource for async OCR completion notifications
+P1
+Sprint 6
+Apex REST
+B4-T34
+Build ktOCRReview LWC — field-by-field accept/reject, confidence score colour coding, Accept All High Confidence action
+P1
+Sprint 6
+LWC
+B4-T35
+Publish KT_OCR_Job_Complete__e Platform Event and wire to HR Copilot Agentforce action
+P1
+Sprint 6
+Platform Events + Agentforce
+B4-T36
+Configure Agentforce KT HR Copilot B4 actions: OCR discrepancy detection, gap analysis, bulk job status, signing escalation
+P0
+Sprint 6
+Agentforce
+B4-T37
+Configure Agentforce KT Compliance Auditor B4 actions: missing compliance docs, expiring documents, audit report generation
+P0
+Sprint 6
+Agentforce
+B4-T38
+Build KT_VirusScanService.cls — pre-upload virus scan via Named Credential; quarantine logic
+P1
+Sprint 5
+Apex + Named Credential
+B4-T39
+Build KT_BulkDocumentJobService.cls — validateCohort(), getBulkJobStatus() @AuraEnabled methods
+P1
+Sprint 4
+Apex
+B4-T40
+Configure Shield Platform Encryption on PII fields (KT_Signer__c, KT_OCR_Job__c)
+P1
+Sprint 5
+Salesforce Shield
+B4-T41
+Configure Field Audit Trail on all audit-critical status fields (10-year retention)
+P1
+Sprint 5
+Field Audit Trail
+B4-T42
+Build Scheduled Flow: KT_Document_Expiry_Alert (30/60/90-day expiry notifications)
+P1
+Sprint 5
+Salesforce Scheduled Flow
+B4-T43
+Populate 200+ KT_DocumentTemplate__c records across 8 domains — template library seeding
+P1
+Sprint 6
+Data Load
+B4-T44
+Populate KT_OCR_FieldMapping__mdt records for Passport, Driver's License, Professional License (both providers)
+P1
+Sprint 6
+Custom Metadata
+B4-T45
+Expose kt_upload_document, kt_get_document_vault, kt_dispatch_signing MCP tools (Headless 360)
+P1
+Sprint 7
+MCP / Agentforce
+B4-T46
+Upgrade DocuSign connector to AgentExchange MCP tool (Sprint 8 add-on)
+P2
+Sprint 8
+AgentExchange / MCP
+B4-T47
+Trusted Agent Identity for SOX/HIPAA high-value signatures
+P1
+Sprint 8
+Trusted Agent Identity
+B4-T48
+AXL signing tiles — Slack/Teams interactive signing card with mobile signing flow
+P1
+Sprint 8
+AXL / Agentforce
+B4-T49
+React-based document preview player via Vibes 2.0 (Sprint 9 Beta)
+P2
+Sprint 9
+React / Vibes 2.0
+15. Subscription Tier Mapping & AppExchange Licensing
+15.1  Feature Gate Matrix
+B4 Sub-Feature
+Free
+Starter
+Professional
+Enterprise
+Ultra
+Document checklist generation (DIE-driven)
+✓ (3 docs)
+✓
+✓
+✓
+✓
+Document generation from templates
+✗
+✓ (10 templates)
+✓ (200+)
+✓
+✓
+Document vault (per-onboardee)
+✗
+✓
+✓
+✓
+✓
+Document versioning
+✗
+✗
+✓
+✓
+✓
+KT Sign (native e-signature)
+✗
+✗
+✓
+✓
+✓
+Multi-party signing (sequential/parallel)
+✗
+✗
+✓
+✓
+✓
+E-signature delegation & expiry
+✗
+✗
+✓
+✓
+✓
+DocuSign / Adobe Sign add-on
+✗
+✗
+Add-on
+Add-on
+Add-on
+OCR document ingestion
+✗
+✗
+✗
+✓
+✓
+Bulk document send (1,000+)
+✗
+✗
+✗
+✓
+✓
+Agentforce HR Copilot OCR review
+✗
+✗
+✗
+✓
+✓
+Trusted Agent Identity (high-value signatures)
+✗
+✗
+✗
+✗
+✓
+AXL Slack/Teams signing tiles
+✗
+✗
+✗
+Enterprise+
+✓
+Custom document templates (admin-created)
+✗
+✓
+✓
+✓
+✓
+White-label document vault portal branding
+✗
+✗
+✗
+✗
+✓
+15.2  Feature Gate Enforcement
+Feature gating is enforced via KT_Feature_Gate__mdt records checked in KT_DocumentGeneratorService.cls, KT_ESignatureOrchestrator.cls, and KT_OcrIngestionService.cls before executing any gated operation. If the subscriber org's tier does not include the requested feature, a KT_FeatureGateException is raised with an in-app upgrade prompt linking to the AppExchange checkout flow.
+16. Non-Functional Requirements
+Requirement
+Target
+Measurement Method
+Single document generation time
+&lt; 3 seconds from button click to ContentVersion created
+Apex CPU time logs + LWC LCP measurement
+Bulk document generation (1,000 records)
+&lt; 60 minutes end-to-end via Batch Apex
+KT_Bulk_Document_Job__c.Completed_At minus Started_At
+OCR processing time (single document, synchronous)
+&lt; 8 seconds from upload to HR review screen available
+Platform Event timestamp delta: KT_Document_Uploaded__e → KT_OCR_Job_Complete__e
+E-signature invitation dispatch time
+&lt; 5 seconds from HR confirmation to email delivered to signer
+SMTP delivery timestamp vs. KT_Signer__c dispatch timestamp
+Document vault page load (ktDocumentVault LWC)
+&lt; 2 seconds for up to 50 vault entries
+Lighthouse Performance audit on Lightning record page
+Portal document upload (ktDocumentVaultPortal)
+&lt; 3 seconds from file drop to ContentVersion created
+Portal network waterfall measurement
+Concurrent signers (multi-party signing)
+Support 100+ concurrent signing sessions without degradation
+Load test via Salesforce Performance Testing guidelines
+Data retention for audit records
+KT_Signature_Audit__c: minimum 7 years (10-year Field Audit Trail for HIPAA/SOX orgs)
+Shield Field Audit Trail configuration audit
+Appendix A — Glossary
+Term
+Definition
+CLM
+Contract Lifecycle Management — end-to-end management of document creation, negotiation, execution, and storage.
+CMT
+Custom Metadata Type — Salesforce metadata record used to store configuration data that is upgrade-safe and deployable via Metadata API.
+ContentDocument / ContentVersion
+Salesforce standard objects representing files. ContentDocument is the parent; ContentVersion is each version of the file.
+KT Sign
+KT Onboarding's native e-signature capability — canvas-based, legally valid, no third-party dependency.
+Named Credential
+Salesforce secure credential store for external API authentication — used for all B4 external callouts.
+OCR
+Optical Character Recognition — AI-powered extraction of structured text data from scanned document images.
+Platform Event
+Salesforce event-driven messaging mechanism — used in B4 for asynchronous document lifecycle event propagation.
+Screen Flow
+Salesforce declarative Flow type that renders user-facing guided experiences — replaces OmniScript in B4.
+Shield Platform Encryption
+Salesforce add-on that encrypts data at rest using customer-managed keys — applied to PII fields in B4.
+Trusted Agent Identity
+Salesforce Sprint 8 feature — adds mobile-push biometric authorization for high-value agent actions.
+AXL
+Agent Experience Layer — Salesforce technology that renders Agentforce agent interactions natively in Slack and Microsoft Teams.
+Appendix B — Related Documents
+KT Onboarding Enterprise Design Document v2.0 — parent architecture document covering all 13 features
+KT Onboarding Enterprise Feature Summary List v2.0 — B1–B13 feature overview
+KT Onboarding Enterprise Product Blueprint v3.0 — Sprint Plan and feature deep-dives
+KT Onboarding API Reference (Swagger/OpenAPI 3.0) — B4 endpoint documentation
+KT Onboarding Data Dictionary — complete field-level documentation for all 28 custom objects including B4 objects
+KT Onboarding AppExchange Security Review Submission — security attestation covering B4 OCR and e-signature components
+Appendix C — Document Revision History
+Version
+Date
+Author
+Changes
+v1.0
+April 2026
+KT Architecture Team
+Initial B4 standalone design document — full end-to-end coverage of Document Management & CLM with no OmniStudio dependency. AWS Textract + Azure Form Recognizer dual OCR provider design. 49 development tasks across 9 sprints.
+— End of Document —
+KT Onboarding Enterprise  |  B4 Document Management & CLM  |  Confidential — Internal Use Only  |  April 2026
+

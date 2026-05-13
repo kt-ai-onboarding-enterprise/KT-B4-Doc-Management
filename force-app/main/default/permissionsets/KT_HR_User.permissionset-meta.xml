@@ -1,7 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
     <classAccesses>
+        <apexClass>KT_BulkDocumentBatch</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>KT_BulkDocumentJobService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>KT_BulkDocumentQueueable</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>KT_DocumentChecklistService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>KT_DocumentFlowAutomationService</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -53,6 +69,10 @@
         <name>KT_Signature_Config__mdt</name>
     </customMetadataTypeAccesses>
     <description>B4 HR access to create, read, and edit document requests, vault entries, and signature workflow records without audit deletion rights.</description>
+    <flowAccesses>
+        <enabled>true</enabled>
+        <flow>KT_Bulk_Send_Wizard</flow>
+    </flowAccesses>
     <flowAccesses>
         <enabled>true</enabled>
         <flow>KT_Document_Generation_Wizard</flow>

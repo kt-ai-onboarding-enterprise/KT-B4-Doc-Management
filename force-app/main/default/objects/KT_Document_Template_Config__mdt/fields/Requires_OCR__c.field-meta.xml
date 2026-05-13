@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Requires_OCR__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>If true, uploads that match this domain/persona template configuration are routed into the OCR ingestion pipeline.</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Requires OCR</label>
+    <type>Checkbox</type>
+</CustomField>

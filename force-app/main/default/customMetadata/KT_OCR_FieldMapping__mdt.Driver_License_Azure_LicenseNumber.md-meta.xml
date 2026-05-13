@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <label>Driver License Azure License Number</label>
+    <protected>false</protected>
+    <values><field>Document_Type__c</field><value xsi:type="xsd:string">Driver's License</value></values>
+    <values><field>OCR_Provider__c</field><value xsi:type="xsd:string">Azure Form Recognizer</value></values>
+    <values><field>Provider_Field_Path__c</field><value xsi:type="xsd:string">DocumentNumber</value></values>
+    <values><field>Target_Object__c</field><value xsi:type="xsd:string">KT_Onboarding__c</value></values>
+    <values><field>Target_Field__c</field><value xsi:type="xsd:string">Driver_License_Number__c</value></values>
+    <values><field>Confidence_Threshold__c</field><value xsi:type="xsd:double">85.0</value></values>
+</CustomMetadata>

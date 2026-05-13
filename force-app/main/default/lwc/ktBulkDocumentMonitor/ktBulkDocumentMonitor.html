@@ -1,0 +1,166 @@
+<template>
+    <lightning-card title="Bulk Document Monitor" icon-name="utility:dashboard">
+        <div class="monitor-shell">
+            <div class="toolbar">
+                <div class="toolbar__input">
+                    <template if:true={shouldShowSelector}>
+                        <lightning-input
+                            type="text"
+                            label="Bulk Job Id"
+                            value={draftJobId}
+                            onchange={handleJobIdInput}>
+                        </lightning-input>
+                    </template>
+
+                    <template if:false={shouldShowSelector}>
+                        <div class="context-block">
+                            <div class="context-block__label">Monitoring Job</div>
+                            <div class="context-block__value">{effectiveJobId}</div>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="toolbar__actions">
+                    <template if:true={shouldShowLoadButton}>
+                        <lightning-button
+                            variant="brand"
+                            label="Monitor"
+                            onclick={handleLoadJob}
+                            disabled={isMonitorDisabled}>
+                        </lightning-button>
+                    </template>
+                    <template if:true={hasJob}>
+                        <lightning-button
+                            label="Open Job"
+                            onclick={handleOpenJob}>
+                        </lightning-button>
+                    </template>
+                    <lightning-button-icon
+                        icon-name="utility:refresh"
+                        variant="border-filled"
+                        alternative-text="Refresh"
+                        title="Refresh"
+                        onclick={handleRefresh}>
+                    </lightning-button-icon>
+                    <template if:true={showClearButton}>
+                        <lightning-button-icon
+                            icon-name="utility:close"
+                            variant="border-filled"
+                            alternative-text="Clear"
+                            title="Clear"
+                            onclick={handleClearSelection}>
+                        </lightning-button-icon>
+                    </template>
+                </div>
+            </div>
+
+            <div class="helper-text">Auto-refreshes every 10 seconds while the job is still running.</div>
+
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading bulk job" size="small"></lightning-spinner>
+            </template>
+
+            <template if:true={errorMessage}>
+                <div class="error-message" role="alert">{errorMessage}</div>
+            </template>
+
+            <template if:true={hasJob}>
+                <section class="job-panel">
+                    <div class="job-header">
+                        <div>
+                            <div class="job-name">{job.jobName}</div>
+                            <div class="job-subtitle">{job.progressCaption}</div>
+                        </div>
+                        <span class={job.statusClass}>{job.status}</span>
+                    </div>
+
+                    <lightning-progress-bar value={job.progressValue} size="medium"></lightning-progress-bar>
+
+                    <dl class="stat-grid">
+                        <div class="stat-card">
+                            <dt>Processed</dt>
+                            <dd>{job.processed} / {job.totalRecords}</dd>
+                        </div>
+                        <div class="stat-card">
+                            <dt>Successes</dt>
+                            <dd>{job.successCount}</dd>
+                        </div>
+                        <div class="stat-card">
+                            <dt>Failures</dt>
+                            <dd>{job.failureCount}</dd>
+                        </div>
+                        <div class="stat-card">
+                            <dt>Estimated Completion</dt>
+                            <dd>{job.estimatedCompletionLabel}</dd>
+                        </div>
+                        <div class="stat-card">
+                            <dt>Started</dt>
+                            <dd>{job.startedAtLabel}</dd>
+                        </div>
+                        <div class="stat-card">
+                            <dt>Completed</dt>
+                            <dd>{job.completedAtLabel}</dd>
+                        </div>
+                    </dl>
+
+                    <div class="detail-grid">
+                        <div class="detail-block">
+                            <div class="detail-block__label">Apex Job Id</div>
+                            <div class="detail-block__value">{job.apexJobId}</div>
+                        </div>
+                        <div class="detail-block">
+                            <div class="detail-block__label">Job Record</div>
+                            <div class="detail-block__value">{job.jobId}</div>
+                        </div>
+                    </div>
+
+                    <template if:true={hasFailureDetails}>
+                        <section class="failure-panel">
+                            <div class="failure-panel__title">Failure Details</div>
+                            <template for:each={job.failureDetails} for:item="failureDetail">
+                                <div key={failureDetail.key} class="failure-row">{failureDetail.message}</div>
+                            </template>
+                        </section>
+                    </template>
+
+                    <template if:true={job.hasFailureCountWithoutSummary}>
+                        <div class="empty-note">Failures were recorded for this job, but no detail summary is available.</div>
+                    </template>
+                </section>
+            </template>
+
+            <template if:true={hasRecentJobs}>
+                <section class="recent-panel">
+                    <div class="panel-title">Recent Jobs</div>
+                    <div class="recent-grid">
+                        <template for:each={recentJobs} for:item="recentJob">
+                            <article key={recentJob.jobId} class="recent-card">
+                                <div class="recent-card__header">
+                                    <div class="recent-card__name">{recentJob.jobName}</div>
+                                    <span class={recentJob.statusClass}>{recentJob.status}</span>
+                                </div>
+                                <div class="recent-card__meta">{recentJob.progressCaption}</div>
+                                <div class="recent-card__meta">Failures: {recentJob.failureCount}</div>
+                                <div class="recent-card__meta">Estimated completion: {recentJob.estimatedCompletionLabel}</div>
+                                <lightning-button
+                                    class="recent-card__action"
+                                    label="Monitor"
+                                    data-id={recentJob.jobId}
+                                    onclick={handleSelectRecent}>
+                                </lightning-button>
+                            </article>
+                        </template>
+                    </div>
+                </section>
+            </template>
+
+            <template if:false={hasJob}>
+                <template if:false={hasRecentJobs}>
+                    <template if:false={isLoading}>
+                        <div class="empty-state">Enter a bulk job id or launch the component from a bulk job record or app page URL with a job id.</div>
+                    </template>
+                </template>
+            </template>
+        </div>
+    </lightning-card>
+</template>

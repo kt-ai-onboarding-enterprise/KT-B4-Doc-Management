@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <description>B4 five-screen guided bulk send wizard for cohort selection, template review, pre-flight validation, signature configuration, and bulk launch monitoring.</description>
+    <interviewLabel>KT Bulk Send Wizard {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>KT Bulk Send Wizard</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>Flow</processType>
+    <screens>
+        <name>Select_Cohort</name>
+        <label>Select Cohort</label>
+        <locationX>176</locationX>
+        <locationY>134</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>false</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Select_Template</targetReference>
+        </connector>
+        <fields>
+            <name>SelectCohortText</name>
+            <fieldText>&lt;p&gt;Select up to 10,000 onboarding records by cohort, date range, or saved list view for this bulk dispatch run.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Select_Template</name>
+        <label>Select Template</label>
+        <locationX>176</locationX>
+        <locationY>254</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>false</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Preflight_Validation</targetReference>
+        </connector>
+        <fields>
+            <name>SelectTemplateText</name>
+            <fieldText>&lt;p&gt;Choose the outbound document template and preview merge output from a representative onboarding record before launch.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Preflight_Validation</name>
+        <label>Pre-flight Validation</label>
+        <locationX>176</locationX>
+        <locationY>374</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>false</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Signature_Config</targetReference>
+        </connector>
+        <fields>
+            <name>PreflightValidationText</name>
+            <fieldText>&lt;p&gt;Run cohort validation with KT_BulkDocumentJobService.validateCohort() to identify missing merge data before documents are generated.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Signature_Config</name>
+        <label>Signature Config</label>
+        <locationX>176</locationX>
+        <locationY>494</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>false</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Launch_And_Monitor</targetReference>
+        </connector>
+        <fields>
+            <name>SignatureConfigText</name>
+            <fieldText>&lt;p&gt;For signature-enabled templates, capture uniform signer configuration, routing order, and expiry settings before the bulk job starts.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Launch_And_Monitor</name>
+        <label>Launch &amp; Monitor</label>
+        <locationX>176</locationX>
+        <locationY>614</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <fields>
+            <name>LaunchAndMonitorText</name>
+            <fieldText>&lt;p&gt;Launch the bulk document job, then monitor processed count, success/failure totals, estimated completion time, and failure details in ktBulkDocumentMonitor.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Select_Cohort</targetReference>
+        </connector>
+    </start>
+    <status>Active</status>
+    <variables>
+        <name>onboardingIdsCsv</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>templateId</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>jobName</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>signatureConfigJson</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>bulkJobId</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>true</isOutput>
+    </variables>
+</Flow>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <description>B4 scheduled document request reminder flow. Runs daily at 08:30 org timezone for outstanding onboarding document requests.</description>
+    <interviewLabel>KT DocumentRequest Reminder {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>KT DocumentRequest Reminder</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Run_Document_Request_Reminder</targetReference>
+        </connector>
+        <filters>
+            <field>Status__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Not Started</stringValue>
+            </value>
+        </filters>
+        <object>KT_Document_Request__c</object>
+        <schedule>
+            <frequency>Daily</frequency>
+            <startDate>2026-05-06</startDate>
+            <startTime>08:30:00.000Z</startTime>
+        </schedule>
+        <triggerType>Scheduled</triggerType>
+    </start>
+    <actionCalls>
+        <name>Run_Document_Request_Reminder</name>
+        <label>Run Document Request Reminder</label>
+        <locationX>176</locationX>
+        <locationY>134</locationY>
+        <actionName>KT_DocumentFlowAutomationService</actionName>
+        <actionType>apex</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>recordId</name>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>actionType</name>
+            <value>
+                <stringValue>DOCUMENT_REQUEST_REMINDER</stringValue>
+            </value>
+        </inputParameters>
+    </actionCalls>
+    <status>Active</status>
+</Flow>

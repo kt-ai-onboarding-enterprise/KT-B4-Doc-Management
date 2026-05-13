@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <description>B4 scheduled expiry escalation flow. Runs daily at 08:00 org timezone for in-progress KT signature requests.</description>
+    <interviewLabel>KT ESignature Expiry Check {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>KT ESignature Expiry Check</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Run_Expiry_Escalation</targetReference>
+        </connector>
+        <filters>
+            <field>Status__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>In Progress</stringValue>
+            </value>
+        </filters>
+        <object>KT_Signature_Request__c</object>
+        <schedule>
+            <frequency>Daily</frequency>
+            <startDate>2026-05-06</startDate>
+            <startTime>08:00:00.000Z</startTime>
+        </schedule>
+        <triggerType>Scheduled</triggerType>
+    </start>
+    <actionCalls>
+        <name>Run_Expiry_Escalation</name>
+        <label>Run Expiry Escalation</label>
+        <locationX>176</locationX>
+        <locationY>134</locationY>
+        <actionName>KT_DocumentFlowAutomationService</actionName>
+        <actionType>apex</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>recordId</name>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>actionType</name>
+            <value>
+                <stringValue>SIGNATURE_EXPIRY</stringValue>
+            </value>
+        </inputParameters>
+    </actionCalls>
+    <status>Active</status>
+</Flow>

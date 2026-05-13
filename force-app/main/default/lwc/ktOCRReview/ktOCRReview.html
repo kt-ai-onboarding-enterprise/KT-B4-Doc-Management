@@ -1,0 +1,125 @@
+<template>
+    <lightning-card title="OCR Review" icon-name="utility:scan">
+        <div class="review-shell">
+            <div class="toolbar">
+                <div class="toolbar__summary">
+                    <span class="summary-pill">{providerLabel}</span>
+                    <span class="summary-pill">{documentTypeLabel}</span>
+                    <span class="summary-pill">Status: {statusLabel}</span>
+                    <span class="summary-pill">Overall Confidence: {summaryConfidence}</span>
+                </div>
+                <div class="toolbar__actions">
+                    <lightning-button
+                        label="Accept All High Confidence"
+                        title="Accept all fields with confidence of 90% or higher"
+                        onclick={handleAcceptAllHighConfidence}
+                        disabled={isAccepted}>
+                    </lightning-button>
+                    <lightning-button
+                        class="slds-m-left_x-small"
+                        label="Clear Selections"
+                        onclick={handleClearSelections}
+                        disabled={isAccepted}>
+                    </lightning-button>
+                    <lightning-button-icon
+                        class="slds-m-left_x-small"
+                        icon-name="utility:refresh"
+                        variant="border-filled"
+                        alternative-text="Refresh"
+                        title="Refresh"
+                        onclick={handleRefresh}>
+                    </lightning-button-icon>
+                </div>
+            </div>
+
+            <template if:true={errorMessage}>
+                <div class="error-message" role="alert">{errorMessage}</div>
+            </template>
+
+            <template if:true={successMessage}>
+                <div class="success-message" role="status">{successMessage}</div>
+            </template>
+
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading OCR review" size="small"></lightning-spinner>
+            </template>
+
+            <template if:true={isSubmitting}>
+                <lightning-spinner alternative-text="Applying OCR review" size="small"></lightning-spinner>
+            </template>
+
+            <template if:true={hasRows}>
+                <div class="review-metrics">
+                    <span>{selectedCount} selected</span>
+                    <span>{highConfidenceCount} high-confidence</span>
+                    <span>{fieldCount} mapped fields</span>
+                </div>
+
+                <div class="review-table-wrap">
+                    <table class="review-table slds-table slds-table_cell-buffer slds-table_bordered">
+                        <thead>
+                            <tr class="slds-line-height_reset">
+                                <th scope="col">Accept</th>
+                                <th scope="col">Provider Field</th>
+                                <th scope="col">Extracted Value</th>
+                                <th scope="col">Current Salesforce Value</th>
+                                <th scope="col">Target Field</th>
+                                <th scope="col">Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={rows} for:item="row">
+                                <tr key={row.rowKey} class="review-row">
+                                    <td>
+                                        <lightning-input
+                                            type="checkbox"
+                                            variant="label-hidden"
+                                            checked={row.isSelected}
+                                            data-key={row.rowKey}
+                                            onchange={handleToggleSelection}
+                                            disabled={isAccepted}>
+                                        </lightning-input>
+                                    </td>
+                                    <td>
+                                        <div class="field-name">{row.providerFieldPath}</div>
+                                        <div class="field-subtext">{row.targetObjectLabel}</div>
+                                    </td>
+                                    <td>
+                                        <div class="value-cell">{row.extractedValueDisplay}</div>
+                                    </td>
+                                    <td>
+                                        <div class="value-cell value-cell_muted">{row.currentValueDisplay}</div>
+                                    </td>
+                                    <td>
+                                        <div class="field-name">{row.targetFieldLabel}</div>
+                                        <div class="field-subtext">{row.targetObject}.{row.targetField}</div>
+                                    </td>
+                                    <td>
+                                        <span class={row.confidenceClass}>{row.confidenceLabel}</span>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="footer-actions">
+                    <lightning-button
+                        variant="brand"
+                        label="Apply Accepted Fields"
+                        onclick={handleApplyAccepted}
+                        disabled={isApplyDisabled}>
+                    </lightning-button>
+                </div>
+            </template>
+
+            <template if:false={hasRows}>
+                <template if:false={errorMessage}>
+                    <template if:false={isLoading}>
+                    <div class="empty-state">No OCR fields are ready for review.</div>
+                    </template>
+                </template>
+            </template>
+        </div>
+    </lightning-card>
+</template>
