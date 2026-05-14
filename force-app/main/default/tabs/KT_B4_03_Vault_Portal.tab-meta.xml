@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Step 5 UI: HR vault and portal vault components.</description>
+    <flexiPage>KT_B4_03_Vault_Portal</flexiPage>
+    <label>03 Vault Portal</label>
+    <motif>Custom43: Jewel</motif>
+</CustomTab>

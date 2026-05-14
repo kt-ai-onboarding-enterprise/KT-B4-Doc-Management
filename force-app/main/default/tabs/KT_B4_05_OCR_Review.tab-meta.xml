@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Step 7 UI: OCR review component.</description>
+    <flexiPage>KT_B4_05_OCR_Review</flexiPage>
+    <label>05 OCR Review</label>
+    <motif>Custom63: Chip</motif>
+</CustomTab>

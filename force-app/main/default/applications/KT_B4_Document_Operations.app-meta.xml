@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomApplication xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Guided B4 document operations app for testing onboarding document generation, upload, vault, signing, OCR, CLM, bulk send, and audit export flows end to end.</description>
+    <formFactors>Large</formFactors>
+    <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
+    <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
+    <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
+    <label>KT B4 Document Operations</label>
+    <navType>Standard</navType>
+    <tabs>standard-Home</tabs>
+    <tabs>KT_Onboarding__c</tabs>
+    <tabs>KT_DocumentTemplate__c</tabs>
+    <tabs>KT_B4_01_Checklist_Upload</tabs>
+    <tabs>KT_B4_02_Generate_Sign_Config</tabs>
+    <tabs>KT_B4_03_Vault_Portal</tabs>
+    <tabs>KT_B4_04_Signature_Capture</tabs>
+    <tabs>KT_B4_05_OCR_Review</tabs>
+    <tabs>KT_B4_06_Bulk_Monitor</tabs>
+    <tabs>KT_Document_Request__c</tabs>
+    <tabs>KT_DocumentVault__c</tabs>
+    <tabs>KT_Signature_Request__c</tabs>
+    <tabs>KT_Signer__c</tabs>
+    <tabs>KT_Signature_Audit__c</tabs>
+    <tabs>KT_OCR_Job__c</tabs>
+    <tabs>KT_Bulk_Document_Job__c</tabs>
+    <uiType>Lightning</uiType>
+</CustomApplication>

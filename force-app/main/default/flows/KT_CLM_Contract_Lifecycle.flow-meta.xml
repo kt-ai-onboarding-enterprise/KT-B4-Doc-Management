@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <description>B4 CLM contract lifecycle flow. Creates stage tasks for contract vault transitions after the trigger enforces ordered Draft, Legal Review, Counter-Sign, Fully Executed, and Archived movement.</description>
+    <interviewLabel>KT CLM Contract Lifecycle {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>KT CLM Contract Lifecycle</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Run_CLM_Lifecycle</targetReference>
+        </connector>
+        <doesRequireRecordChangedToMeetCriteria>false</doesRequireRecordChangedToMeetCriteria>
+        <filters>
+            <field>Document_Type__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Contract</stringValue>
+            </value>
+        </filters>
+        <object>KT_DocumentVault__c</object>
+        <recordTriggerType>Update</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+    </start>
+    <actionCalls>
+        <name>Run_CLM_Lifecycle</name>
+        <label>Run CLM Lifecycle</label>
+        <locationX>176</locationX>
+        <locationY>134</locationY>
+        <actionName>KT_CLMContractLifecycleService</actionName>
+        <actionType>apex</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>recordId</name>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </inputParameters>
+    </actionCalls>
+    <status>Active</status>
+</Flow>

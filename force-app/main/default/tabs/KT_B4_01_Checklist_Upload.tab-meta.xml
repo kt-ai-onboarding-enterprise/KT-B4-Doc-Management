@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Step 3 UI: document checklist and upload components.</description>
+    <flexiPage>KT_B4_01_Checklist_Upload</flexiPage>
+    <label>01 Checklist Upload</label>
+    <motif>Custom18: Form</motif>
+</CustomTab>

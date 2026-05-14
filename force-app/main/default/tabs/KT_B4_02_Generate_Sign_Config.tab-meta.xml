@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Step 4 UI: document preview, generation, and signing configuration components.</description>
+    <flexiPage>KT_B4_02_Generate_Sign_Config</flexiPage>
+    <label>02 Generate Sign</label>
+    <motif>Custom20: Airplane</motif>
+</CustomTab>

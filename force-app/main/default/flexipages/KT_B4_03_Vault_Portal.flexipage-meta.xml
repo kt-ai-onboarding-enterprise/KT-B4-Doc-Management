@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FlexiPage xmlns="http://soap.sforce.com/2006/04/metadata">
+    <flexiPageRegions>
+        <itemInstances><componentInstance>
+            <componentInstanceProperties>
+                <name>ktOnboardingId</name>
+                <value></value>
+            </componentInstanceProperties>
+            <componentName>c:ktDocumentVault</componentName>
+            <identifier>ktDocumentVault</identifier>
+        </componentInstance></itemInstances>
+        <itemInstances><componentInstance>
+            <componentInstanceProperties>
+                <name>ktOnboardingId</name>
+                <value></value>
+            </componentInstanceProperties>
+            <componentInstanceProperties>
+                <name>uploadFlowApiName</name>
+                <value>KT_Document_Upload</value>
+            </componentInstanceProperties>
+            <componentName>c:ktDocumentVaultPortal</componentName>
+            <identifier>ktDocumentVaultPortal</identifier>
+        </componentInstance></itemInstances>
+        <name>main</name>
+        <type>Region</type>
+    </flexiPageRegions>
+    <masterLabel>KT B4 03 Vault Portal</masterLabel>
+    <template>
+        <name>flexipage:defaultAppHomeTemplate</name>
+    </template>
+    <type>AppPage</type>
+</FlexiPage>

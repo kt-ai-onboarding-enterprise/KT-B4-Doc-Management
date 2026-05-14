@@ -1,0 +1,22 @@
+
+The app starts with an onboarding record. When a new KT_Onboarding__c record is created, the document checklist automation reads the configured template rules and creates required KT_Document_Request__c records for that onboardee.
+
+From there, HR can review the checklist in the 01 Checklist Upload tab. For inbound documents, the onboardee or HR uploads files. Uploads are virus-scanned, stored as Salesforce Files, linked into KT_DocumentVault__c, and connected back to the original document request.
+
+For outbound documents, HR uses the generation flow or 02 Generate Sign. The system previews merge data, generates the document from a template, stores it in the vault, and can configure who needs to sign. If signature is required, a KT_Signature_Request__c and related KT_Signer__c records are created.
+
+Signing happens through the KT Sign flow. The signer opens the signature pad, signs, and the system records legal evidence in KT_Signature_Audit__c: timestamp, signer info, IP/device data where available, session token, and hash. When all signers are complete, the document vault and document request are marked complete.
+
+The 03 Vault Portal tab shows the document vault: generated files, uploaded files, signed documents, OCR status, signature status, expiry, versions, and compliance/audit records. This is the main place to see the document lifecycle.
+
+If an uploaded document requires OCR, the upload event starts an OCR job. The OCR service sends the document to the configured provider, stores extracted fields and confidence scores, and then HR reviews them in 05 OCR Review. Accepted OCR data can be applied back to Salesforce records.
+
+Bulk document generation is handled through the bulk job services and monitored in 06 Bulk Monitor. HR can launch a cohort job, then track processed records, successes, failures, and completion status.
+
+For contracts, the CLM lifecycle runs on vault records with document type Contract. The system enforces the order: Draft → Legal Review → Counter-Sign → Fully Executed → Archived, and creates tasks at each stage.
+
+At the end, an audit export can generate a certified PDF evidence package for an onboarding record. It summarizes vault documents, file version history, signature evidence, audit records, and OCR results, then stores that export back into the vault as a compliance record.
+
+So the overall flow is:
+
+Onboarding → Document checklist → Upload or generate documents → Store in vault → Sign if needed → OCR/review if needed → CLM if contract → Audit export / compliance evidence.
