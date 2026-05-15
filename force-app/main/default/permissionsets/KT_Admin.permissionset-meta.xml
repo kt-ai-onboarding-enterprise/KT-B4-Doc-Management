@@ -9,6 +9,14 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>KT_AdobeSignService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>KT_AdobeSignWebhookHandler</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>KT_BulkDocumentBatch</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -101,6 +109,108 @@
         <enabled>true</enabled>
         <flow>KT_Document_Generation_Wizard</flow>
     </flowAccesses>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>KT_DocumentTemplate__c.Domain__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>KT_DocumentTemplate__c.Is_Active__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>KT_DocumentTemplate__c.Language__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>KT_DocumentTemplate__c.Merge_Field_Map__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>KT_DocumentTemplate__c.Output_Format__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>KT_DocumentTemplate__c.Persona__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>KT_DocumentTemplate__c.Regulatory_Framework__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>KT_DocumentTemplate__c.Requires_Signature__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>KT_DocumentTemplate__c.Signature_Expiry_Days__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>KT_DocumentTemplate__c.Signer_Roles__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>KT_DocumentTemplate__c.Template_Binary__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>KT_DocumentTemplate__c.Version__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Document_Request__c.Document_Direction__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Document_Request__c.Is_Required__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Document_Request__c.Status__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_DocumentVault__c.Content_Document_Id__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_DocumentVault__c.Document_Request__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_DocumentVault__c.Document_Type__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_DocumentVault__c.Expiry_Date__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_DocumentVault__c.OCR_Status__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_DocumentVault__c.Regulatory_Tag__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_DocumentVault__c.Signature_Status__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_DocumentVault__c.Status__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_DocumentVault__c.Upload_Timestamp__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_DocumentVault__c.Uploaded_By__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_DocumentVault__c.Version_Number__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_OCR_Job__c.Confidence_Score__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_OCR_Job__c.Document_Type_Detected__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_OCR_Job__c.Extracted_Fields__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_OCR_Job__c.Job_Id__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_OCR_Job__c.KT_Onboarding__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_OCR_Job__c.OCR_Provider__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_OCR_Job__c.Retry_Count__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_OCR_Job__c.Status__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Signature_Request__c.Completed_Document_Id__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Signature_Request__c.Completed_Signers__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Signature_Request__c.Expiry_Date__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Signature_Request__c.External_Envelope_Id__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Signature_Request__c.KT_Onboarding__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Signature_Request__c.Signing_Order__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Signature_Request__c.Signing_Provider__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Signature_Request__c.Status__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Signature_Request__c.Total_Signers__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Signer__c.Device_User_Agent__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Signer__c.IP_Address__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Signer__c.Signed_At__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Signer__c.Signer_Role__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Signer__c.Signing_Order__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Signer__c.Status__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Signature_Audit__c.Device_User_Agent__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Signature_Audit__c.Hash_Value__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Signature_Audit__c.IP_Address__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Signature_Audit__c.KT_Signature_Request__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Signature_Audit__c.KT_Signer__c</field><readable>true</readable></fieldPermissions>
     <hasActivationRequired>false</hasActivationRequired>
     <label>KT Admin</label>
     <objectPermissions>

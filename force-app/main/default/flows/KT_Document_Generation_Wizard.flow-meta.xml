@@ -55,7 +55,7 @@
         <showFooter>true</showFooter>
         <showHeader>true</showHeader>
     </screens>
-    <screens>
+    <screens> 
         <name>Configure_Signatures</name>
         <label>Configure Signatures</label>
         <locationX>176</locationX>

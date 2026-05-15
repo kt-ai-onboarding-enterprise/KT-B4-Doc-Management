@@ -30,6 +30,13 @@ private class KT_OcrPollingBatchTest {
         }
     }
 
+    @TestSetup
+    static void setupQueue() {
+        Group hrQueue = new Group(Name = 'KT HR Queue', DeveloperName = 'KT_HR_Queue', Type = 'Queue');
+        insert hrQueue;
+        insert new QueueSobject(QueueId = hrQueue.Id, SObjectType = 'Task');
+    }
+
     private static KT_Onboarding__c createOnboarding() {
         KT_Onboarding__c onboarding = new KT_Onboarding__c();
         insert onboarding;
@@ -101,10 +108,6 @@ private class KT_OcrPollingBatchTest {
         KT_OcrIngestionService.enqueueAsyncPolling = false;
         KT_OcrPollingBatch.enableChainedPolling = false;
 
-        Group hrQueue = new Group(Name = 'KT HR Queue', DeveloperName = 'KT_HR_Queue', Type = 'Queue');
-        insert hrQueue;
-        insert new QueueSobject(QueueId = hrQueue.Id, SObjectType = 'Task');
-
         KT_Onboarding__c onboarding = createOnboarding();
         KT_OCR_Job__c ocrJob = createOcrJob(onboarding);
         update new KT_OCR_Job__c(
@@ -140,6 +143,7 @@ private class KT_OcrPollingBatchTest {
             WHERE WhatId = :ocrJob.Id
             LIMIT 1
         ];
+        Group hrQueue = [SELECT Id FROM Group WHERE DeveloperName = 'KT_HR_Queue' LIMIT 1];
         System.assertEquals(hrQueue.Id, reviewTask.OwnerId);
         System.assertEquals('High', reviewTask.Priority);
         System.assert(reviewTask.Subject.contains('OCR manual review required'));

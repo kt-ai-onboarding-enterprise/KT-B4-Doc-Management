@@ -1,0 +1,17 @@
+{
+  "name": "kt-b4-document-tools-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "MCP stdio tools for KT B4 document operations.",
+  "bin": {
+    "kt-b4-document-tools": "./server.js"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
