@@ -41,6 +41,14 @@ public with sharing class KT_ESignatureOrchestrator {
         @InvocableVariable public String message;
     }
 
+    public class TrustedAgentIdentityResult {
+        @AuraEnabled public Id signatureRequestId;
+        @AuraEnabled public String status;
+        @AuraEnabled public Datetime verifiedAt;
+        @AuraEnabled public String verificationReference;
+        @AuraEnabled public String message;
+    }
+
     @AuraEnabled
     public static Boolean completeSignature(
         Id signerId,
@@ -77,11 +85,12 @@ public with sharing class KT_ESignatureOrchestrator {
         }
 
         KT_DocumentVault__c vaultEntry = [
-            SELECT Id, KT_Onboarding__c
+            SELECT Id, KT_Onboarding__c, Regulatory_Tag__c
             FROM KT_DocumentVault__c
             WHERE Id = :vaultId
             LIMIT 1
         ];
+        Boolean requiresTrustedIdentity = isHighValueSignature(vaultEntry.Regulatory_Tag__c);
 
         KT_Signature_Request__c signatureRequest = new KT_Signature_Request__c(
             KT_DocumentVault__c = vaultId,
@@ -92,7 +101,9 @@ public with sharing class KT_ESignatureOrchestrator {
             Completed_Signers__c = 0,
             Expiry_Date__c = Date.today().addDays(config.expiryDays == null ? 14 : config.expiryDays),
             Signing_Order__c = String.isBlank(config.signingOrder) ? 'Sequential' : config.signingOrder,
-            Initiated_By__c = UserInfo.getUserId()
+            Initiated_By__c = UserInfo.getUserId(),
+            Requires_Trusted_Agent_Identity__c = requiresTrustedIdentity,
+            Trusted_Agent_Verification_Status__c = requiresTrustedIdentity ? 'Pending' : 'Not Required'
         );
         insert signatureRequest;
 
@@ -119,6 +130,46 @@ public with sharing class KT_ESignatureOrchestrator {
 
         dispatchNextInvitation(signatureRequest.Id);
         return signatureRequest.Id;
+    }
+
+    @AuraEnabled
+    public static TrustedAgentIdentityResult verifyTrustedAgentIdentity(
+        Id signatureRequestId,
+        String verificationReference,
+        Boolean verified
+    ) {
+        if (signatureRequestId == null) {
+            throw new AuraHandledException('signatureRequestId is required.');
+        }
+
+        KT_Signature_Request__c signatureRequest = [
+            SELECT Id, Requires_Trusted_Agent_Identity__c, Trusted_Agent_Verification_Status__c
+            FROM KT_Signature_Request__c
+            WHERE Id = :signatureRequestId
+            LIMIT 1
+            FOR UPDATE
+        ];
+
+        String status = verified == true ? 'Verified' : 'Failed';
+        Datetime verifiedAt = verified == true ? System.now() : null;
+        update new KT_Signature_Request__c(
+            Id = signatureRequest.Id,
+            Trusted_Agent_Verification_Status__c = status,
+            Trusted_Agent_Verified_At__c = verifiedAt,
+            Trusted_Agent_Verification_Reference__c = verificationReference
+        );
+
+        SignaturePayload payload = new SignaturePayload();
+        payload.sessionToken = verificationReference;
+        createAuditEvent(null, signatureRequest.Id, verified == true ? 'Trusted Identity Verified' : 'Trusted Identity Failed', payload);
+
+        TrustedAgentIdentityResult result = new TrustedAgentIdentityResult();
+        result.signatureRequestId = signatureRequest.Id;
+        result.status = status;
+        result.verifiedAt = verifiedAt;
+        result.verificationReference = verificationReference;
+        result.message = verified == true ? 'Trusted agent identity verified.' : 'Trusted agent identity verification failed.';
+        return result;
     }
 
     public static void dispatchNextInvitation(Id signatureRequestId) {
@@ -203,6 +254,7 @@ public with sharing class KT_ESignatureOrchestrator {
             LIMIT 1
             FOR UPDATE
         ];
+        enforceTrustedIdentityBeforeFinalSignature(signer.KT_Signature_Request__c, signer.Id);
 
         Id signatureImageId = storeSignatureImage(signerId, payload.signatureBase64);
         signer.Status__c = 'Signed';
@@ -264,7 +316,8 @@ public with sharing class KT_ESignatureOrchestrator {
     public static void completeWorkflow(Id signatureRequestId) {
         KT_Signature_Request__c signatureRequest = [
             SELECT Id, Status__c, KT_Onboarding__c, KT_DocumentVault__c, KT_DocumentVault__r.Content_Document_Id__c,
-                   KT_DocumentVault__r.Document_Request__c
+                   KT_DocumentVault__r.Document_Request__c, Requires_Trusted_Agent_Identity__c,
+                   Trusted_Agent_Verification_Status__c
             FROM KT_Signature_Request__c
             WHERE Id = :signatureRequestId
             LIMIT 1
@@ -274,6 +327,10 @@ public with sharing class KT_ESignatureOrchestrator {
             return;
         }
         refreshCounts(signatureRequestId);
+        if (signatureRequest.Requires_Trusted_Agent_Identity__c == true
+            && signatureRequest.Trusted_Agent_Verification_Status__c != 'Verified') {
+            throw new ESignatureException('Trusted Agent Identity verification is required before completing this high-value signature workflow.');
+        }
 
         signatureRequest.Status__c = 'Fully Signed';
         signatureRequest.Completed_Document_Id__c = signatureRequest.KT_DocumentVault__r.Content_Document_Id__c;
@@ -401,6 +458,30 @@ public with sharing class KT_ESignatureOrchestrator {
         return activeCount == 0 && signedCount > 0;
     }
 
+    private static void enforceTrustedIdentityBeforeFinalSignature(Id signatureRequestId, Id currentSignerId) {
+        KT_Signature_Request__c signatureRequest = [
+            SELECT Requires_Trusted_Agent_Identity__c, Trusted_Agent_Verification_Status__c
+            FROM KT_Signature_Request__c
+            WHERE Id = :signatureRequestId
+            LIMIT 1
+        ];
+        if (signatureRequest.Requires_Trusted_Agent_Identity__c != true
+            || signatureRequest.Trusted_Agent_Verification_Status__c == 'Verified') {
+            return;
+        }
+
+        Integer otherActiveSignerCount = [
+            SELECT COUNT()
+            FROM KT_Signer__c
+            WHERE KT_Signature_Request__c = :signatureRequestId
+            AND Id != :currentSignerId
+            AND Status__c IN ('Pending', 'Invitation Sent', 'Viewed')
+        ];
+        if (otherActiveSignerCount == 0) {
+            throw new ESignatureException('Trusted Agent Identity verification is required before completing this high-value signature workflow.');
+        }
+    }
+
     private static Id getSignatureRequestId(Id signerId) {
         return [
             SELECT KT_Signature_Request__c
@@ -451,6 +532,14 @@ public with sharing class KT_ESignatureOrchestrator {
     private static String stripDataUrlPrefix(String value) {
         Integer commaIndex = value.indexOf(',');
         return value.startsWith('data:') && commaIndex > -1 ? value.substring(commaIndex + 1) : value;
+    }
+
+    private static Boolean isHighValueSignature(String regulatoryTag) {
+        if (String.isBlank(regulatoryTag)) {
+            return false;
+        }
+        String normalized = regulatoryTag.toUpperCase();
+        return normalized.contains('SOX') || normalized.contains('HIPAA');
     }
 
     private static void publishSignatureCompleteEvent(

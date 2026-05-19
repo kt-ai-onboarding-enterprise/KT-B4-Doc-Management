@@ -1,5 +1,46 @@
 .config-shell {
-    padding: 0.75rem;
+    background:
+        linear-gradient(180deg, #f7fbff 0%, #f6f7f9 42%, #ffffff 100%);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.config-hero {
+    align-items: center;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(241, 247, 255, 0.98));
+    border: 1px solid #d8dde6;
+    border-radius: 8px;
+    border-left: 4px solid #1b96ff;
+    box-shadow: 0 8px 18px rgba(24, 24, 24, 0.08);
+    display: flex;
+    gap: 0.75rem;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    padding: 0.8rem;
+}
+
+.eyebrow,
+.signer-count span {
+    color: #5c5c5c;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+}
+
+.hero-title {
+    color: #181818;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.signer-count {
+    text-align: right;
+}
+
+.signer-count strong {
+    display: block;
+    font-size: 1.35rem;
+    line-height: 1.2;
 }
 
 .settings-grid {
@@ -16,12 +57,34 @@
 
 .signer-row {
     align-items: end;
+    background: #ffffff;
     border: 1px solid #d8dde6;
-    border-radius: 6px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(24, 24, 24, 0.06);
     display: grid;
     gap: 0.75rem;
-    grid-template-columns: 1fr 1fr minmax(9rem, 0.8fr) minmax(5rem, 0.35fr) auto;
+    grid-template-columns: auto 1fr 1fr minmax(9rem, 0.8fr) minmax(5rem, 0.35fr) auto;
     padding: 0.75rem;
+    transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+}
+
+.signer-row:hover {
+    border-color: #aacbff;
+    box-shadow: 0 10px 20px rgba(24, 24, 24, 0.1);
+    transform: translateY(-1px);
+}
+
+.signer-badge {
+    align-items: center;
+    align-self: center;
+    background: linear-gradient(135deg, #eef4ff, #e3fcef);
+    border-radius: 999px;
+    color: #0b5cab;
+    display: flex;
+    font-weight: 700;
+    height: 2rem;
+    justify-content: center;
+    width: 2rem;
 }
 
 .actions {
@@ -44,5 +107,14 @@
     .settings-grid,
     .signer-row {
         grid-template-columns: 1fr;
+    }
+
+    .config-hero {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .signer-count {
+        text-align: left;
     }
 }

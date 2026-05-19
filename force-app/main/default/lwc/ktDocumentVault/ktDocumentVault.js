@@ -1,5 +1,6 @@
 import { LightningElement, api, wire } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
+import { CurrentPageReference } from 'lightning/navigation';
 import getVaultEntries from '@salesforce/apex/KT_DocumentVaultService.getVaultEntries';
 import getVersionHistory from '@salesforce/apex/KT_DocumentVaultService.getVersionHistory';
 import archiveVaultEntry from '@salesforce/apex/KT_DocumentVaultService.archiveVaultEntry';
@@ -11,6 +12,7 @@ export default class KtDocumentVault extends LightningElement {
     @api recordId;
     @api ktOnboardingId;
 
+    pageStateOnboardingId;
     wiredVaultResult;
     entries = [];
     sections = [];
@@ -23,9 +25,11 @@ export default class KtDocumentVault extends LightningElement {
     isWaiveModalOpen = false;
     isLoading = false;
     errorMessage;
+    searchTerm = '';
+    statusFilter = 'All';
 
     get effectiveOnboardingId() {
-        return this.ktOnboardingId || this.recordId;
+        return this.ktOnboardingId || this.recordId || this.pageStateOnboardingId;
     }
 
     get hasSections() {
@@ -34,6 +38,36 @@ export default class KtDocumentVault extends LightningElement {
 
     get documentCount() {
         return this.entries.length;
+    }
+
+    get visibleEntries() {
+        const search = this.searchTerm.trim().toLowerCase();
+        return this.entries.filter((entry) => {
+            const matchesStatus = this.statusFilter === 'All' || entry.status === this.statusFilter;
+            const matchesSearch =
+                !search ||
+                String(entry.documentName || '').toLowerCase().includes(search) ||
+                String(entry.documentType || '').toLowerCase().includes(search) ||
+                String(entry.regulatoryTag || '').toLowerCase().includes(search);
+            return matchesStatus && matchesSearch;
+        });
+    }
+
+    get visibleDocumentCount() {
+        return this.visibleEntries.length;
+    }
+
+    get signaturePendingCount() {
+        return this.entries.filter((entry) => entry.signatureStatus === 'Pending').length;
+    }
+
+    get ocrReviewCount() {
+        return this.entries.filter((entry) => entry.ocrStatus === 'Review Required').length;
+    }
+
+    get statusOptions() {
+        const statuses = Array.from(new Set(this.entries.map((entry) => entry.status).filter(Boolean))).sort();
+        return [{ label: 'All Statuses', value: 'All' }, ...statuses.map((status) => ({ label: status, value: status }))];
     }
 
     get hasPreview() {
@@ -51,12 +85,18 @@ export default class KtDocumentVault extends LightningElement {
         if (result.data) {
             this.errorMessage = undefined;
             this.entries = result.data.map((entry) => this.decorateEntry(entry));
-            this.sections = this.groupEntries(this.entries);
+            this.sections = this.groupEntries(this.visibleEntries);
         } else if (result.error) {
             this.entries = [];
             this.sections = [];
             this.errorMessage = this.normalizeError(result.error);
         }
+    }
+
+    @wire(CurrentPageReference)
+    wiredPageReference(pageRef) {
+        const state = pageRef?.state || {};
+        this.pageStateOnboardingId = state.c__onboardingId || state.onboardingId;
     }
 
     decorateEntry(entry) {
@@ -92,7 +132,17 @@ export default class KtDocumentVault extends LightningElement {
         } else {
             this.expandedTypes.add(type);
         }
-        this.sections = this.groupEntries(this.entries);
+        this.sections = this.groupEntries(this.visibleEntries);
+    }
+
+    handleSearch(event) {
+        this.searchTerm = event.target.value || '';
+        this.sections = this.groupEntries(this.visibleEntries);
+    }
+
+    handleStatusFilter(event) {
+        this.statusFilter = event.detail.value;
+        this.sections = this.groupEntries(this.visibleEntries);
     }
 
     async handleRefresh() {

@@ -1,8 +1,11 @@
 <template>
     <lightning-card title="Document Vault" icon-name="standard:file">
         <div class="vault-shell">
-            <div class="toolbar">
-                <div class="toolbar__count">{documentCount} documents</div>
+            <div class="vault-hero">
+                <div>
+                    <div class="eyebrow">Document Vault</div>
+                    <div class="hero-title">{visibleDocumentCount} of {documentCount} documents</div>
+                </div>
                 <lightning-button-icon
                     icon-name="utility:refresh"
                     variant="border-filled"
@@ -10,6 +13,39 @@
                     title="Refresh"
                     onclick={handleRefresh}>
                 </lightning-button-icon>
+            </div>
+
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <span>Signature Pending</span>
+                    <strong>{signaturePendingCount}</strong>
+                </div>
+                <div class="kpi-card">
+                    <span>OCR Review</span>
+                    <strong>{ocrReviewCount}</strong>
+                </div>
+                <div class="kpi-card">
+                    <span>Total Files</span>
+                    <strong>{documentCount}</strong>
+                </div>
+            </div>
+
+            <div class="filter-bar">
+                <lightning-input
+                    type="search"
+                    label="Search vault"
+                    variant="label-hidden"
+                    placeholder="Search documents, type, or regulatory tag"
+                    value={searchTerm}
+                    onchange={handleSearch}>
+                </lightning-input>
+                <lightning-combobox
+                    label="Status"
+                    variant="label-hidden"
+                    value={statusFilter}
+                    options={statusOptions}
+                    onchange={handleStatusFilter}>
+                </lightning-combobox>
             </div>
 
             <template if:true={errorMessage}>
@@ -74,7 +110,10 @@
 
             <template if:false={hasSections}>
                 <template if:false={isLoading}>
-                    <div class="empty-state">No vault documents found.</div>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="utility:search" size="small"></lightning-icon>
+                        <span>No vault documents match the current view.</span>
+                    </div>
                 </template>
             </template>
 

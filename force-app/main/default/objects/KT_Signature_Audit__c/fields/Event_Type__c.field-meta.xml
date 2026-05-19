@@ -18,6 +18,8 @@
             <value><fullName>Declined</fullName><default>false</default><label>Declined</label></value>
             <value><fullName>Expired</fullName><default>false</default><label>Expired</label></value>
             <value><fullName>Completed</fullName><default>false</default><label>Completed</label></value>
+            <value><fullName>Trusted Identity Verified</fullName><default>false</default><label>Trusted Identity Verified</label></value>
+            <value><fullName>Trusted Identity Failed</fullName><default>false</default><label>Trusted Identity Failed</label></value>
         </valueSetDefinition>
     </valueSet>
 </CustomField>

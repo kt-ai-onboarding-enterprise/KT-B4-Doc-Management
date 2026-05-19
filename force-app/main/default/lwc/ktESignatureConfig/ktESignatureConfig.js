@@ -1,10 +1,12 @@
-import { LightningElement, api } from 'lwc';
+import { LightningElement, api, wire } from 'lwc';
+import { CurrentPageReference } from 'lightning/navigation';
 import initiateSigningWorkflow from '@salesforce/apex/KT_ESignatureOrchestrator.initiateSigningWorkflow';
 
 export default class KtESignatureConfig extends LightningElement {
     @api recordId;
     @api vaultId;
 
+    pageStateVaultId;
     provider = 'KT Sign';
     signingOrder = 'Sequential';
     expiryDays = 14;
@@ -38,11 +40,19 @@ export default class KtESignatureConfig extends LightningElement {
     }
 
     get effectiveVaultId() {
-        return this.vaultId || this.recordId;
+        return this.vaultId || this.recordId || this.pageStateVaultId;
     }
 
     get isCreateDisabled() {
         return this.isSaving || !this.effectiveVaultId || !this.hasValidSigners();
+    }
+
+    get signerCount() {
+        return this.signers.length;
+    }
+
+    get workflowSummary() {
+        return `${this.provider} · ${this.signingOrder} · ${this.expiryDays} days`;
     }
 
     handleProviderChange(event) {
@@ -133,5 +143,11 @@ export default class KtESignatureConfig extends LightningElement {
             return error.body.map((item) => item.message).join(', ');
         }
         return error?.body?.message || error?.message || 'Something went wrong.';
+    }
+
+    @wire(CurrentPageReference)
+    wiredPageReference(pageRef) {
+        const state = pageRef?.state || {};
+        this.pageStateVaultId = state.c__vaultId || state.vaultId;
     }
 }

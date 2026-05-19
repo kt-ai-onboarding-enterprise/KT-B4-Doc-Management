@@ -1,5 +1,6 @@
 import { LightningElement, api, wire } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
+import { CurrentPageReference } from 'lightning/navigation';
 import getReviewData from '@salesforce/apex/KT_OcrIngestionService.getReviewData';
 import applyExtraction from '@salesforce/apex/KT_OcrIngestionService.applyExtraction';
 
@@ -7,6 +8,7 @@ export default class KtOCRReview extends LightningElement {
     @api recordId;
     @api ocrJobId;
 
+    pageStateOcrJobId;
     wiredReviewResult;
     reviewData;
     rows = [];
@@ -17,7 +19,7 @@ export default class KtOCRReview extends LightningElement {
     successMessage;
 
     get effectiveOcrJobId() {
-        return this.ocrJobId || this.recordId;
+        return this.ocrJobId || this.recordId || this.pageStateOcrJobId;
     }
 
     get hasRows() {
@@ -82,6 +84,12 @@ export default class KtOCRReview extends LightningElement {
             this.selectedFieldKeys = new Set();
             this.errorMessage = this.normalizeError(result.error);
         }
+    }
+
+    @wire(CurrentPageReference)
+    wiredPageReference(pageRef) {
+        const state = pageRef?.state || {};
+        this.pageStateOcrJobId = state.c__ocrJobId || state.ocrJobId;
     }
 
     buildRows(fields) {

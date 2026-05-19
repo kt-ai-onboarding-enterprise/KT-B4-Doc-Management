@@ -1,4 +1,5 @@
-import { LightningElement, api } from 'lwc';
+import { LightningElement, api, wire } from 'lwc';
+import { CurrentPageReference } from 'lightning/navigation';
 import uploadDocument from '@salesforce/apex/KT_DocumentUploadService.uploadDocument';
 
 const MAX_BYTES = 26214400;
@@ -9,6 +10,8 @@ export default class KtDocumentUpload extends LightningElement {
     @api ktOnboardingId;
     @api documentRequestId;
 
+    pageStateOnboardingId;
+    pageStateDocumentRequestId;
     selectedFile;
     selectedFileName = 'Drop a file or choose one';
     isDragging = false;
@@ -18,7 +21,11 @@ export default class KtDocumentUpload extends LightningElement {
     successMessage;
 
     get effectiveOnboardingId() {
-        return this.ktOnboardingId || this.recordId;
+        return this.ktOnboardingId || this.recordId || this.pageStateOnboardingId;
+    }
+
+    get effectiveDocumentRequestId() {
+        return this.documentRequestId || this.pageStateDocumentRequestId;
     }
 
     get acceptedTypes() {
@@ -99,7 +106,7 @@ export default class KtDocumentUpload extends LightningElement {
             this.progressValue = 65;
             const result = await uploadDocument({
                 onboardingId: this.effectiveOnboardingId,
-                documentRequestId: this.documentRequestId,
+                documentRequestId: this.effectiveDocumentRequestId,
                 fileName: this.selectedFile.name,
                 base64Data,
                 contentType: this.selectedFile.type
@@ -137,5 +144,12 @@ export default class KtDocumentUpload extends LightningElement {
             return error.body.map((item) => item.message).join(', ');
         }
         return error?.body?.message || error?.message || 'Something went wrong.';
+    }
+
+    @wire(CurrentPageReference)
+    wiredPageReference(pageRef) {
+        const state = pageRef?.state || {};
+        this.pageStateOnboardingId = state.c__onboardingId || state.onboardingId;
+        this.pageStateDocumentRequestId = state.c__documentRequestId || state.documentRequestId;
     }
 }

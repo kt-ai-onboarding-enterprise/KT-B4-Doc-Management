@@ -10,7 +10,7 @@ B4 callouts must use Named Credentials only. The package includes endpoint metad
 | `KT_AWS_Textract_NC` | AWS Signature Version 4 | Configure AWS region/service `textract` and a named principal or STS principal. |
 | `KT_Azure_FormRecognizer_NC` | API Key or Azure AD OAuth | Replace placeholder resource host with the subscriber Azure AI Document Intelligence endpoint. |
 | `KT_VirusScan_NC` | API Key | Replace placeholder endpoint with the subscriber-approved malware scanning service. |
-| `KT_AdobeSign_NC` | OAuth 2.0 Authorization Code | Required by the tracker for the Sprint 6 Adobe Sign add-on tasks. |
+| `KT_AdobeSign_NC` | OAuth 2.0 Authorization Code | Paused for the current demo; configure only when Adobe Sign is selected as the customer signing provider. |
 
 ## Package-Safe Rules
 

@@ -1,5 +1,6 @@
 import { LightningElement, api, wire } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
+import { CurrentPageReference } from 'lightning/navigation';
 import getVaultEntries from '@salesforce/apex/KT_DocumentVaultService.getVaultEntries';
 
 export default class KtDocumentVaultPortal extends LightningElement {
@@ -7,19 +8,21 @@ export default class KtDocumentVaultPortal extends LightningElement {
     @api ktOnboardingId;
     @api uploadFlowApiName;
 
+    pageStateOnboardingId;
     wiredResult;
     documents = [];
     isLoading = false;
     errorMessage;
     showUploadFlow = false;
     selectedDocumentRequestId;
+    searchTerm = '';
 
     connectedCallback() {
         this.restoreCachedDocuments();
     }
 
     get effectiveOnboardingId() {
-        return this.ktOnboardingId || this.recordId;
+        return this.ktOnboardingId || this.recordId || this.pageStateOnboardingId;
     }
 
     get hasDocuments() {
@@ -32,6 +35,26 @@ export default class KtDocumentVaultPortal extends LightningElement {
 
     get completedCount() {
         return this.documents.filter((doc) => doc.status === 'Verified' || doc.status === 'Signed' || doc.status === 'Archived').length;
+    }
+
+    get visibleDocuments() {
+        const search = this.searchTerm.trim().toLowerCase();
+        return this.documents.filter((doc) => {
+            return (
+                !search ||
+                String(doc.documentName || '').toLowerCase().includes(search) ||
+                String(doc.documentType || '').toLowerCase().includes(search) ||
+                String(doc.status || '').toLowerCase().includes(search)
+            );
+        });
+    }
+
+    get hasVisibleDocuments() {
+        return this.visibleDocuments.length > 0;
+    }
+
+    get visibleCount() {
+        return this.visibleDocuments.length;
     }
 
     get completionLabel() {
@@ -64,6 +87,12 @@ export default class KtDocumentVaultPortal extends LightningElement {
         }
     }
 
+    @wire(CurrentPageReference)
+    wiredPageReference(pageRef) {
+        const state = pageRef?.state || {};
+        this.pageStateOnboardingId = state.c__onboardingId || state.onboardingId;
+    }
+
     decorateDocument(doc) {
         return {
             ...doc,
@@ -77,6 +106,10 @@ export default class KtDocumentVaultPortal extends LightningElement {
         this.isLoading = true;
         await refreshApex(this.wiredResult);
         this.isLoading = false;
+    }
+
+    handleSearch(event) {
+        this.searchTerm = event.target.value || '';
     }
 
     openUploadFlow(event) {

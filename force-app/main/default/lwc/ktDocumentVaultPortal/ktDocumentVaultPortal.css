@@ -1,11 +1,27 @@
 .portal-shell {
-    padding: 0.75rem;
+    background:
+        linear-gradient(180deg, #f7fbff 0%, #f6f7f9 42%, #ffffff 100%);
+    border-radius: 8px;
+    padding: 1rem;
 }
 
 .portal-header {
     align-items: center;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(241, 247, 255, 0.98));
+    border: 1px solid #d8dde6;
+    border-radius: 8px;
+    border-left: 4px solid #1b96ff;
+    box-shadow: 0 8px 18px rgba(24, 24, 24, 0.08);
     display: flex;
     justify-content: space-between;
+    padding: 0.8rem;
+}
+
+.eyebrow {
+    color: #5c5c5c;
+    font-size: 0.72rem;
+    text-transform: uppercase;
 }
 
 .portal-header h2 {
@@ -20,15 +36,20 @@
 }
 
 .completion-track {
-    background: #e5e5e5;
-    border-radius: 4px;
-    height: 0.5rem;
+    background: #e8edf4;
+    border-radius: 999px;
+    height: 0.65rem;
     margin: 0.75rem 0;
     overflow: hidden;
 }
 
+.portal-search {
+    margin-bottom: 0.75rem;
+}
+
 .completion-fill {
-    background: #2e844a;
+    background: linear-gradient(90deg, #2e844a, #1b96ff);
+    border-radius: inherit;
     height: 100%;
     transition: width 160ms ease;
 }
@@ -39,9 +60,18 @@
 }
 
 .document-card {
+    background: #ffffff;
     border: 1px solid #d8dde6;
-    border-radius: 6px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(24, 24, 24, 0.06);
     padding: 0.75rem;
+    transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+}
+
+.document-card:hover {
+    border-color: #aacbff;
+    box-shadow: 0 10px 20px rgba(24, 24, 24, 0.1);
+    transform: translateY(-1px);
 }
 
 .document-card_expired {
@@ -61,11 +91,14 @@
 }
 
 .doc-meta {
+    background: #f8fbff;
+    border-radius: 8px;
     color: #5c5c5c;
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
     margin-top: 0.5rem;
+    padding: 0.5rem;
 }
 
 .hr-note {
@@ -141,6 +174,14 @@
 }
 
 .empty-state {
+    align-items: center;
+    background: #ffffff;
+    border: 1px dashed #c9c9c9;
+    border-radius: 8px;
     color: #5c5c5c;
-    padding: 0.75rem 0;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    min-height: 5rem;
+    padding: 1rem;
 }

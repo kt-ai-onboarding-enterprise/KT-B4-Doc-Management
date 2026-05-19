@@ -1,10 +1,16 @@
 <template>
     <lightning-card title="OCR Review" icon-name="utility:scan">
         <div class="review-shell">
+            <div class="review-hero">
+                <div>
+                    <div class="eyebrow">Extraction Review</div>
+                    <div class="hero-title">{documentTypeLabel}</div>
+                </div>
+                <span class="provider-badge">{providerLabel}</span>
+            </div>
+
             <div class="toolbar">
                 <div class="toolbar__summary">
-                    <span class="summary-pill">{providerLabel}</span>
-                    <span class="summary-pill">{documentTypeLabel}</span>
                     <span class="summary-pill">Status: {statusLabel}</span>
                     <span class="summary-pill">Overall Confidence: {summaryConfidence}</span>
                 </div>
@@ -50,9 +56,18 @@
 
             <template if:true={hasRows}>
                 <div class="review-metrics">
-                    <span>{selectedCount} selected</span>
-                    <span>{highConfidenceCount} high-confidence</span>
-                    <span>{fieldCount} mapped fields</span>
+                    <div class="metric-card">
+                        <span>Selected</span>
+                        <strong>{selectedCount}</strong>
+                    </div>
+                    <div class="metric-card">
+                        <span>High Confidence</span>
+                        <strong>{highConfidenceCount}</strong>
+                    </div>
+                    <div class="metric-card">
+                        <span>Mapped Fields</span>
+                        <strong>{fieldCount}</strong>
+                    </div>
                 </div>
 
                 <div class="review-table-wrap">
@@ -116,7 +131,10 @@
             <template if:false={hasRows}>
                 <template if:false={errorMessage}>
                     <template if:false={isLoading}>
-                    <div class="empty-state">No OCR fields are ready for review.</div>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="utility:scan" size="small"></lightning-icon>
+                        <span>No OCR fields are ready for review.</span>
+                    </div>
                     </template>
                 </template>
             </template>

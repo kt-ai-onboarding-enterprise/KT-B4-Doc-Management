@@ -1,22 +1,70 @@
 .upload-shell {
-    padding: 0.75rem;
+    background:
+        linear-gradient(180deg, #f7fbff 0%, #f6f7f9 42%, #ffffff 100%);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.upload-header {
+    align-items: center;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.eyebrow {
+    color: #5c5c5c;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+}
+
+.upload-title {
+    color: #181818;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.limit-pill {
+    background: #eef4ff;
+    border: 1px solid #aacbff;
+    border-radius: 999px;
+    color: #0b5cab;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.3rem 0.65rem;
+    white-space: nowrap;
 }
 
 .drop-zone {
     align-items: center;
+    background:
+        linear-gradient(180deg, #ffffff, #f8fbff);
     border: 1px dashed #747474;
-    border-radius: 6px;
+    border-radius: 8px;
+    box-shadow: 0 8px 18px rgba(24, 24, 24, 0.07);
     display: grid;
     gap: 0.65rem;
     justify-items: center;
-    min-height: 9rem;
-    padding: 1rem;
-    transition: background 120ms ease, border-color 120ms ease;
+    min-height: 12rem;
+    padding: 1.25rem;
+    transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
 }
 
 .drop-zone_active {
     background: #eef4ff;
     border-color: #0b5cab;
+    box-shadow: 0 0 0 3px rgba(11, 92, 171, 0.12), 0 12px 24px rgba(24, 24, 24, 0.12);
+}
+
+.drop-icon {
+    align-items: center;
+    background: linear-gradient(135deg, #eef4ff, #e3fcef);
+    border-radius: 999px;
+    display: flex;
+    height: 2.5rem;
+    justify-content: center;
+    width: 2.5rem;
 }
 
 .drop-title {
@@ -24,6 +72,12 @@
     font-weight: 700;
     max-width: 100%;
     overflow-wrap: anywhere;
+}
+
+.drop-subtitle,
+.progress-label {
+    color: #5c5c5c;
+    font-size: 0.8rem;
 }
 
 .file-input {
@@ -35,6 +89,17 @@
     display: flex;
     justify-content: flex-end;
     margin-top: 0.75rem;
+}
+
+.progress-card {
+    background: #ffffff;
+    border: 1px solid #d8dde6;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(24, 24, 24, 0.06);
+    display: grid;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    padding: 0.75rem;
 }
 
 .error-message,

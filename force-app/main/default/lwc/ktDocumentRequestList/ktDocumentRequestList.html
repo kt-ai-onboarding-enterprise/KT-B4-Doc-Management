@@ -1,8 +1,11 @@
 <template>
     <lightning-card title="Document Requests" icon-name="standard:document">
         <div class="request-list">
-            <div class="summary">
-                <div class="summary__count">{completedCount}/{totalCount}</div>
+            <div class="hero-strip">
+                <div>
+                    <div class="eyebrow">Checklist Progress</div>
+                    <div class="hero-title">{completedCount}/{totalCount} complete</div>
+                </div>
                 <div class="summary__bar" aria-label="Checklist completion">
                     <div class="summary__bar-fill" style={completionStyle}></div>
                 </div>
@@ -15,6 +18,39 @@
                 </lightning-button-icon>
             </div>
 
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <span>Open</span>
+                    <strong>{openCount}</strong>
+                </div>
+                <div class="kpi-card">
+                    <span>Overdue</span>
+                    <strong>{overdueCount}</strong>
+                </div>
+                <div class="kpi-card">
+                    <span>Visible</span>
+                    <strong>{visibleCount}</strong>
+                </div>
+            </div>
+
+            <div class="filter-bar">
+                <lightning-input
+                    type="search"
+                    label="Search requests"
+                    variant="label-hidden"
+                    placeholder="Search by document, direction, or status"
+                    value={searchTerm}
+                    onchange={handleSearch}>
+                </lightning-input>
+                <lightning-combobox
+                    label="Status"
+                    variant="label-hidden"
+                    value={statusFilter}
+                    options={statusOptions}
+                    onchange={handleStatusFilter}>
+                </lightning-combobox>
+            </div>
+
             <template if:true={errorMessage}>
                 <div class="error-message" role="alert">{errorMessage}</div>
             </template>
@@ -23,7 +59,7 @@
                 <lightning-spinner alternative-text="Loading document requests" size="small"></lightning-spinner>
             </template>
 
-            <template if:true={hasRequests}>
+            <template if:true={hasVisibleRows}>
                 <div class="table-wrap">
                     <table class="slds-table slds-table_cell-buffer slds-table_bordered">
                         <thead>
@@ -37,7 +73,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <template for:each={rows} for:item="row">
+                            <template for:each={visibleRows} for:item="row">
                                 <tr key={row.id} class={row.rowClass}>
                                     <th scope="row">
                                         <div class="doc-name">{row.templateName}</div>
@@ -85,9 +121,12 @@
                 </div>
             </template>
 
-            <template if:false={hasRequests}>
+            <template if:false={hasVisibleRows}>
                 <template if:false={isLoading}>
-                    <div class="empty-state">No document requests found.</div>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="utility:search" size="small"></lightning-icon>
+                        <span>No document requests match the current view.</span>
+                    </div>
                 </template>
             </template>
         </div>

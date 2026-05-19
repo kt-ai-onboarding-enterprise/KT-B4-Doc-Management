@@ -1,13 +1,24 @@
 <template>
     <lightning-card title="Document Upload" icon-name="utility:upload">
         <div class="upload-shell">
+            <div class="upload-header">
+                <div>
+                    <div class="eyebrow">Secure Intake</div>
+                    <div class="upload-title">Upload onboarding evidence</div>
+                </div>
+                <span class="limit-pill">25 MB max</span>
+            </div>
+
             <div
                 class={dropZoneClass}
                 ondragover={handleDragOver}
                 ondragleave={handleDragLeave}
                 ondrop={handleDrop}>
-                <lightning-icon icon-name="utility:upload" size="small"></lightning-icon>
+                <div class="drop-icon">
+                    <lightning-icon icon-name="utility:upload" size="small"></lightning-icon>
+                </div>
                 <div class="drop-title">{selectedFileName}</div>
+                <div class="drop-subtitle">PDF, DOCX, JPG, JPEG, or PNG</div>
                 <lightning-input
                     class="file-input"
                     type="file"
@@ -18,7 +29,10 @@
             </div>
 
             <template if:true={isUploading}>
-                <lightning-progress-bar value={progressValue} size="medium"></lightning-progress-bar>
+                <div class="progress-card">
+                    <div class="progress-label">Uploading and preparing vault record</div>
+                    <lightning-progress-bar value={progressValue} size="medium"></lightning-progress-bar>
+                </div>
             </template>
 
             <template if:true={errorMessage}>

@@ -1,19 +1,32 @@
 <template>
     <lightning-card title="Signature" icon-name="utility:signature">
         <div class="signature-shell">
+            <div class="signature-hero">
+                <div>
+                    <div class="eyebrow">Electronic Signature</div>
+                    <div class="hero-title">{signerName}</div>
+                </div>
+                <span class="secure-pill">Session protected</span>
+            </div>
+
             <template if:true={errorMessage}>
                 <div class="error-message" role="alert">{errorMessage}</div>
             </template>
 
+            <template if:true={successMessage}>
+                <div class="success-message" role="status">{successMessage}</div>
+            </template>
+
             <template if:true={hasValidSession}>
                 <div class="signer-line">
-                    <span>{signerName}</span>
                     <span>{signerEmail}</span>
+                    <span>Legal evidence will be captured on submit.</span>
                 </div>
 
                 <div class="legal-notice">{legalNoticeText}</div>
 
                 <div class="canvas-wrap">
+                    <div class="canvas-label">Draw signature below</div>
                     <canvas
                         class="signature-canvas"
                         onpointerdown={handlePointerDown}
@@ -32,7 +45,7 @@
                     </lightning-input>
                     <div class="buttons">
                         <lightning-button label="Clear" onclick={handleClear}></lightning-button>
-                        <lightning-button variant="brand" label="Submit" onclick={handleSubmit} disabled={isSubmitDisabled}></lightning-button>
+                        <lightning-button variant="brand" label="Submit Signature" onclick={handleSubmit} disabled={isSubmitDisabled}></lightning-button>
                     </div>
                 </div>
             </template>

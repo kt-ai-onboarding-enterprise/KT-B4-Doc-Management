@@ -1,4 +1,5 @@
 import { LightningElement, api, wire } from 'lwc';
+import { CurrentPageReference } from 'lightning/navigation';
 import getSigningSession from '@salesforce/apex/KT_ESignatureService.getSigningSession';
 import completeSignature from '@salesforce/apex/KT_ESignatureOrchestrator.completeSignature';
 
@@ -6,6 +7,8 @@ export default class KtSignaturePad extends LightningElement {
     @api signerId;
     @api sessionToken;
 
+    pageStateSignerId;
+    pageStateSessionToken;
     session;
     context;
     canvasInitialized = false;
@@ -14,10 +17,19 @@ export default class KtSignaturePad extends LightningElement {
     hasAgreed = false;
     isSubmitting = false;
     errorMessage;
+    successMessage;
     latitude;
     longitude;
 
-    @wire(getSigningSession, { signerId: '$signerId', sessionToken: '$sessionToken' })
+    get effectiveSignerId() {
+        return this.signerId || this.pageStateSignerId;
+    }
+
+    get effectiveSessionToken() {
+        return this.sessionToken || this.pageStateSessionToken;
+    }
+
+    @wire(getSigningSession, { signerId: '$effectiveSignerId', sessionToken: '$effectiveSessionToken' })
     wiredSession({ data, error }) {
         if (data) {
             this.session = data;
@@ -122,18 +134,20 @@ export default class KtSignaturePad extends LightningElement {
 
         this.isSubmitting = true;
         this.errorMessage = undefined;
+        this.successMessage = undefined;
         try {
             const canvas = this.template.querySelector('canvas');
             const signatureBase64 = canvas.toDataURL('image/png');
             const workflowComplete = await completeSignature({
-                signerId: this.signerId,
+                signerId: this.effectiveSignerId,
                 signatureBase64,
                 ipAddress: null,
                 deviceUserAgent: window.navigator.userAgent,
                 latitude: this.latitude,
                 longitude: this.longitude,
-                sessionToken: this.sessionToken
+                sessionToken: this.effectiveSessionToken
             });
+            this.successMessage = workflowComplete ? 'Signature complete. The workflow is fully signed.' : 'Signature captured. Waiting for remaining signers.';
             this.dispatchEvent(new CustomEvent('signed', { detail: { workflowComplete } }));
         } catch (error) {
             this.errorMessage = this.normalizeError(error);
@@ -173,5 +187,12 @@ export default class KtSignaturePad extends LightningElement {
             return error.body.map((item) => item.message).join(', ');
         }
         return error?.body?.message || error?.message || 'Something went wrong.';
+    }
+
+    @wire(CurrentPageReference)
+    wiredPageReference(pageRef) {
+        const state = pageRef?.state || {};
+        this.pageStateSignerId = state.c__signerId || state.signerId;
+        this.pageStateSessionToken = state.c__sessionToken || state.sessionToken;
     }
 }

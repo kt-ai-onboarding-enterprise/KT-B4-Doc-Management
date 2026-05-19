@@ -1,6 +1,17 @@
 <template>
     <lightning-card title="Document Preview" icon-name="doctype:pdf">
         <div class="preview-shell">
+            <div class="preview-hero">
+                <div>
+                    <div class="eyebrow">Merge Readiness</div>
+                    <div class="hero-title">{completionPercent}% resolved</div>
+                </div>
+                <div class="hero-stats">
+                    <span>{resolvedCount} ready</span>
+                    <span>{unresolvedCount} unresolved</span>
+                </div>
+            </div>
+
             <div class="toolbar">
                 <lightning-input
                     class="template-input"
@@ -43,7 +54,10 @@
 
             <template if:false={hasRows}>
                 <template if:false={isLoading}>
-                    <div class="empty-state">No merge fields found.</div>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="utility:preview" size="small"></lightning-icon>
+                        <span>No merge fields found.</span>
+                    </div>
                 </template>
             </template>
         </div>

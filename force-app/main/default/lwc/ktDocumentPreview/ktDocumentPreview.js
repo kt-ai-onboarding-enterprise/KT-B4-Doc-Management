@@ -1,5 +1,5 @@
 import { LightningElement, api, wire } from 'lwc';
-import { NavigationMixin } from 'lightning/navigation';
+import { CurrentPageReference, NavigationMixin } from 'lightning/navigation';
 import getPreviewData from '@salesforce/apex/KT_DocumentGeneratorService.getPreviewData';
 import generateDocument from '@salesforce/apex/KT_DocumentGeneratorService.generateDocument';
 
@@ -8,6 +8,8 @@ export default class KtDocumentPreview extends NavigationMixin(LightningElement)
     @api ktOnboardingId;
 
     _templateId;
+    pageStateOnboardingId;
+    pageStateTemplateId;
     draftTemplateId;
     rows = [];
     errorMessage;
@@ -15,7 +17,7 @@ export default class KtDocumentPreview extends NavigationMixin(LightningElement)
 
     @api
     get templateId() {
-        return this._templateId || this.draftTemplateId;
+        return this._templateId || this.draftTemplateId || this.pageStateTemplateId;
     }
 
     set templateId(value) {
@@ -24,7 +26,7 @@ export default class KtDocumentPreview extends NavigationMixin(LightningElement)
     }
 
     get effectiveOnboardingId() {
-        return this.ktOnboardingId || this.recordId;
+        return this.ktOnboardingId || this.recordId || this.pageStateOnboardingId;
     }
 
     get hasTemplateApiValue() {
@@ -51,6 +53,14 @@ export default class KtDocumentPreview extends NavigationMixin(LightningElement)
         return Math.round((resolved / this.rows.length) * 100);
     }
 
+    get resolvedCount() {
+        return this.rows.filter((row) => row.resolved).length;
+    }
+
+    get unresolvedCount() {
+        return this.rows.length - this.resolvedCount;
+    }
+
     @wire(getPreviewData, { templateId: '$templateId', onboardingId: '$effectiveOnboardingId' })
     wiredPreview({ data, error }) {
         this.isLoading = false;
@@ -72,6 +82,13 @@ export default class KtDocumentPreview extends NavigationMixin(LightningElement)
             this.rows = [];
             this.errorMessage = this.normalizeError(error);
         }
+    }
+
+    @wire(CurrentPageReference)
+    wiredPageReference(pageRef) {
+        const state = pageRef?.state || {};
+        this.pageStateOnboardingId = state.c__onboardingId || state.onboardingId;
+        this.pageStateTemplateId = state.c__templateId || state.templateId;
     }
 
     handleTemplateChange(event) {

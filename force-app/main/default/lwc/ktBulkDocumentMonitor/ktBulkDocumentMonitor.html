@@ -1,6 +1,14 @@
 <template>
     <lightning-card title="Bulk Document Monitor" icon-name="utility:dashboard">
         <div class="monitor-shell">
+            <div class="monitor-hero">
+                <div>
+                    <div class="eyebrow">Bulk Operations</div>
+                    <div class="hero-title">Generation job command center</div>
+                </div>
+                <span class="refresh-pill">Auto refresh</span>
+            </div>
+
             <div class="toolbar">
                 <div class="toolbar__input">
                     <template if:true={shouldShowSelector}>

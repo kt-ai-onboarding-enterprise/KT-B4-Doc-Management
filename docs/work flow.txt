@@ -1,4 +1,3 @@
-
 The app starts with an onboarding record. When a new KT_Onboarding__c record is created, the document checklist automation reads the configured template rules and creates required KT_Document_Request__c records for that onboardee.
 
 From there, HR can review the checklist in the 01 Checklist Upload tab. For inbound documents, the onboardee or HR uploads files. Uploads are virus-scanned, stored as Salesforce Files, linked into KT_DocumentVault__c, and connected back to the original document request.
@@ -13,10 +12,10 @@ If an uploaded document requires OCR, the upload event starts an OCR job. The OC
 
 Bulk document generation is handled through the bulk job services and monitored in 06 Bulk Monitor. HR can launch a cohort job, then track processed records, successes, failures, and completion status.
 
-For contracts, the CLM lifecycle runs on vault records with document type Contract. The system enforces the order: Draft → Legal Review → Counter-Sign → Fully Executed → Archived, and creates tasks at each stage.
+For contracts, the CLM lifecycle runs on vault records with document type Contract. The system enforces the order: Draft -> Legal Review -> Counter-Sign -> Fully Executed -> Archived, and creates tasks at each stage.
 
 At the end, an audit export can generate a certified PDF evidence package for an onboarding record. It summarizes vault documents, file version history, signature evidence, audit records, and OCR results, then stores that export back into the vault as a compliance record.
 
 So the overall flow is:
 
-Onboarding → Document checklist → Upload or generate documents → Store in vault → Sign if needed → OCR/review if needed → CLM if contract → Audit export / compliance evidence.
+Onboarding -> Document checklist -> Upload or generate documents -> Store in vault -> Sign if needed -> OCR/review if needed -> CLM if contract -> Audit export / compliance evidence.

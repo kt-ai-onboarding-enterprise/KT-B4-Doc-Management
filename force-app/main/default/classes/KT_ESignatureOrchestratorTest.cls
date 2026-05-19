@@ -21,6 +21,10 @@ private class KT_ESignatureOrchestratorTest {
     }
 
     private static KT_DocumentVault__c createVault(Id onboardingId) {
+        return createVault(onboardingId, null);
+    }
+
+    private static KT_DocumentVault__c createVault(Id onboardingId, String regulatoryTag) {
         KT_DocumentVault__c vault = new KT_DocumentVault__c(
             KT_Onboarding__c = onboardingId,
             Document_Name__c = 'Signable Document',
@@ -29,7 +33,8 @@ private class KT_ESignatureOrchestratorTest {
             Status__c = 'Draft',
             OCR_Status__c = 'Not Required',
             Version_Number__c = 1,
-            Signature_Status__c = 'Not Required'
+            Signature_Status__c = 'Not Required',
+            Regulatory_Tag__c = regulatoryTag
         );
         insert vault;
         return vault;
@@ -231,5 +236,63 @@ private class KT_ESignatureOrchestratorTest {
 
         System.assertEquals(false, complete);
         System.assertEquals(false, KT_ESignatureService.validateSessionToken(signer.Id, token.sessionToken));
+    }
+
+    @IsTest
+    static void highValueWorkflowRequiresTrustedAgentIdentity() {
+        KT_Onboarding__c onboarding = createOnboarding();
+        KT_DocumentVault__c vault = createVault(onboarding.Id, 'HIPAA;SOX');
+        KT_ESignatureOrchestrator.SignatureConfig config = twoSignerConfig('Sequential');
+        config.signers.remove(1);
+
+        Id signatureRequestId = KT_ESignatureOrchestrator.initiateSigningWorkflow(vault.Id, config);
+        KT_Signature_Request__c highValueRequest = [
+            SELECT Requires_Trusted_Agent_Identity__c, Trusted_Agent_Verification_Status__c
+            FROM KT_Signature_Request__c
+            WHERE Id = :signatureRequestId
+        ];
+        System.assertEquals(true, highValueRequest.Requires_Trusted_Agent_Identity__c);
+        System.assertEquals('Pending', highValueRequest.Trusted_Agent_Verification_Status__c);
+
+        KT_Signer__c signer = [
+            SELECT Id
+            FROM KT_Signer__c
+            WHERE KT_Signature_Request__c = :signatureRequestId
+            LIMIT 1
+        ];
+        KT_ESignatureOrchestrator.SignaturePayload payload = new KT_ESignatureOrchestrator.SignaturePayload();
+        payload.signatureBase64 = EncodingUtil.base64Encode(Blob.valueOf('high value signature'));
+        payload.ipAddress = '203.0.113.31';
+        payload.deviceUserAgent = 'Trusted Identity Unit Test';
+
+        try {
+            KT_ESignatureOrchestrator.handleSignatureComplete(signer.Id, payload);
+            System.assert(false, 'Expected trusted identity gate to block completion.');
+        } catch (KT_ESignatureOrchestrator.ESignatureException expected) {
+            System.assert(expected.getMessage().contains('Trusted Agent Identity'));
+        }
+
+        KT_ESignatureOrchestrator.TrustedAgentIdentityResult verification =
+            KT_ESignatureOrchestrator.verifyTrustedAgentIdentity(signatureRequestId, 'push-ref-123', true);
+        System.assertEquals('Verified', verification.status);
+
+        Boolean workflowComplete = KT_ESignatureOrchestrator.handleSignatureComplete(signer.Id, payload);
+        System.assertEquals(true, workflowComplete);
+
+        KT_Signature_Request__c completedRequest = [
+            SELECT Status__c, Trusted_Agent_Verification_Status__c, Trusted_Agent_Verified_At__c
+            FROM KT_Signature_Request__c
+            WHERE Id = :signatureRequestId
+        ];
+        System.assertEquals('Fully Signed', completedRequest.Status__c);
+        System.assertEquals('Verified', completedRequest.Trusted_Agent_Verification_Status__c);
+        System.assertNotEquals(null, completedRequest.Trusted_Agent_Verified_At__c);
+
+        System.assertEquals(1, [
+            SELECT COUNT()
+            FROM KT_Signature_Audit__c
+            WHERE KT_Signature_Request__c = :signatureRequestId
+            AND Event_Type__c = 'Trusted Identity Verified'
+        ]);
     }
 }

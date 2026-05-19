@@ -1,6 +1,17 @@
 <template>
     <lightning-card title="Signature Configuration" icon-name="utility:signpost">
         <div class="config-shell">
+            <div class="config-hero">
+                <div>
+                    <div class="eyebrow">Signing Workflow</div>
+                    <div class="hero-title">{workflowSummary}</div>
+                </div>
+                <div class="signer-count">
+                    <span>Signers</span>
+                    <strong>{signerCount}</strong>
+                </div>
+            </div>
+
             <div class="settings-grid">
                 <lightning-combobox label="Provider" value={provider} options={providerOptions} onchange={handleProviderChange}></lightning-combobox>
                 <lightning-combobox label="Order" value={signingOrder} options={orderOptions} onchange={handleOrderChange}></lightning-combobox>
@@ -14,6 +25,7 @@
             <div class="signer-list">
                 <template for:each={signers} for:item="signer" for:index="index">
                     <div key={signer.key} class="signer-row">
+                        <div class="signer-badge">{signer.signingOrder}</div>
                         <lightning-input label="Name" value={signer.signerName} data-index={index} data-field="signerName" onchange={handleSignerChange}></lightning-input>
                         <lightning-input type="email" label="Email" value={signer.signerEmail} data-index={index} data-field="signerEmail" onchange={handleSignerChange}></lightning-input>
                         <lightning-combobox label="Role" value={signer.signerRole} options={roleOptions} data-index={index} data-field="signerRole" onchange={handleSignerChange}></lightning-combobox>
@@ -24,7 +36,7 @@
             </div>
 
             <div class="actions">
-                <lightning-button label="Add Signer" onclick={addSigner}></lightning-button>
+                <lightning-button icon-name="utility:add" label="Add Signer" onclick={addSigner}></lightning-button>
                 <lightning-button variant="brand" label="Create Workflow" onclick={handleCreateWorkflow} disabled={isCreateDisabled}></lightning-button>
             </div>
         </div>

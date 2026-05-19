@@ -1,5 +1,6 @@
 import { LightningElement, api, wire } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
+import { CurrentPageReference } from 'lightning/navigation';
 import getDocumentRequests from '@salesforce/apex/KT_DocumentChecklistService.getDocumentRequests';
 import markUploadRequested from '@salesforce/apex/KT_DocumentChecklistService.markUploadRequested';
 import waiveDocumentRequest from '@salesforce/apex/KT_DocumentChecklistService.waiveDocumentRequest';
@@ -9,6 +10,7 @@ export default class KtDocumentRequestList extends LightningElement {
     @api recordId;
     @api ktOnboardingId;
 
+    pageStateOnboardingId;
     wiredResult;
     rows = [];
     errorMessage;
@@ -16,9 +18,11 @@ export default class KtDocumentRequestList extends LightningElement {
     isWaiveModalOpen = false;
     waiverReason = '';
     selectedRequestId;
+    searchTerm = '';
+    statusFilter = 'All';
 
     get effectiveOnboardingId() {
-        return this.ktOnboardingId || this.recordId;
+        return this.ktOnboardingId || this.recordId || this.pageStateOnboardingId;
     }
 
     get hasRequests() {
@@ -29,8 +33,42 @@ export default class KtDocumentRequestList extends LightningElement {
         return this.rows.length;
     }
 
+    get visibleRows() {
+        const search = this.searchTerm.trim().toLowerCase();
+        return this.rows.filter((row) => {
+            const matchesStatus = this.statusFilter === 'All' || row.status === this.statusFilter;
+            const matchesSearch =
+                !search ||
+                String(row.templateName || '').toLowerCase().includes(search) ||
+                String(row.documentDirection || '').toLowerCase().includes(search) ||
+                String(row.status || '').toLowerCase().includes(search);
+            return matchesStatus && matchesSearch;
+        });
+    }
+
+    get hasVisibleRows() {
+        return this.visibleRows.length > 0;
+    }
+
+    get visibleCount() {
+        return this.visibleRows.length;
+    }
+
     get completedCount() {
         return this.rows.filter((row) => row.status === 'Complete' || row.status === 'Waived').length;
+    }
+
+    get openCount() {
+        return this.rows.filter((row) => row.status !== 'Complete' && row.status !== 'Waived').length;
+    }
+
+    get overdueCount() {
+        return this.rows.filter((row) => row.isOverdue).length;
+    }
+
+    get statusOptions() {
+        const statuses = Array.from(new Set(this.rows.map((row) => row.status).filter(Boolean))).sort();
+        return [{ label: 'All Statuses', value: 'All' }, ...statuses.map((status) => ({ label: status, value: status }))];
     }
 
     get completionStyle() {
@@ -49,6 +87,12 @@ export default class KtDocumentRequestList extends LightningElement {
             this.rows = [];
             this.errorMessage = this.normalizeError(result.error);
         }
+    }
+
+    @wire(CurrentPageReference)
+    wiredPageReference(pageRef) {
+        const state = pageRef?.state || {};
+        this.pageStateOnboardingId = state.c__onboardingId || state.onboardingId;
     }
 
     decorateRow(row) {
@@ -71,6 +115,14 @@ export default class KtDocumentRequestList extends LightningElement {
         this.isLoading = true;
         await refreshApex(this.wiredResult);
         this.isLoading = false;
+    }
+
+    handleSearch(event) {
+        this.searchTerm = event.target.value || '';
+    }
+
+    handleStatusFilter(event) {
+        this.statusFilter = event.detail.value;
     }
 
     async handleGenerate(event) {

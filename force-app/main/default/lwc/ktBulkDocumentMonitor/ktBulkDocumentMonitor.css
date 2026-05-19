@@ -1,5 +1,46 @@
 .monitor-shell {
-    padding: 0.75rem;
+    background:
+        linear-gradient(180deg, #f7fbff 0%, #f6f7f9 42%, #ffffff 100%);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.monitor-hero {
+    align-items: center;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(241, 247, 255, 0.98));
+    border: 1px solid #d8dde6;
+    border-radius: 8px;
+    border-left: 4px solid #1b96ff;
+    box-shadow: 0 8px 18px rgba(24, 24, 24, 0.08);
+    display: flex;
+    gap: 0.75rem;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    padding: 0.8rem;
+}
+
+.eyebrow {
+    color: #5c5c5c;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+}
+
+.hero-title {
+    color: #181818;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.refresh-pill {
+    background: #eef4ff;
+    border: 1px solid #aacbff;
+    border-radius: 999px;
+    color: #0b5cab;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.3rem 0.65rem;
+    white-space: nowrap;
 }
 
 .toolbar {
@@ -21,8 +62,9 @@
 }
 
 .context-block {
+    background: #ffffff;
     border: 1px solid #d8dde6;
-    border-radius: 6px;
+    border-radius: 8px;
     min-height: 4.2rem;
     padding: 0.65rem 0.75rem;
 }
@@ -49,8 +91,10 @@
 .job-panel,
 .recent-panel,
 .failure-panel {
+    background: #ffffff;
     border: 1px solid #d8dde6;
-    border-radius: 6px;
+    border-radius: 8px;
+    box-shadow: 0 6px 16px rgba(24, 24, 24, 0.06);
     margin-top: 0.75rem;
     overflow: hidden;
 }
@@ -98,9 +142,21 @@
 .stat-card,
 .detail-block,
 .recent-card {
+    background: #ffffff;
     border: 1px solid #e5e5e5;
-    border-radius: 6px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(24, 24, 24, 0.05);
     padding: 0.75rem;
+}
+
+.recent-card {
+    transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+}
+
+.recent-card:hover {
+    border-color: #aacbff;
+    box-shadow: 0 10px 20px rgba(24, 24, 24, 0.1);
+    transform: translateY(-1px);
 }
 
 .stat-card dd {
@@ -187,5 +243,10 @@
 @media (max-width: 640px) {
     .toolbar {
         grid-template-columns: 1fr;
+    }
+
+    .monitor-hero {
+        align-items: flex-start;
+        flex-direction: column;
     }
 }
