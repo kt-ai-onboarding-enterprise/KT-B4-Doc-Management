@@ -109,12 +109,16 @@ for (String domain : domainCounts.keySet()) {
         templateRecord.Regulatory_Framework__c = domainFrameworks.get(domain);
         templateRecord.Version__c = 1;
         templateRecord.Language__c = 'English';
-        templateRecord.Merge_Field_Map__c =
-            '[{"token":"{{Onboarding.Name}}","field":"KT_Onboarding__c.Name"},' +
-            '{"token":"{{Candidate.Name}}","field":"KT_Onboarding__c.Candidate_Name__c"},' +
-            '{"token":"{{StartDate}}","field":"KT_Onboarding__c.Start_Date__c"},' +
-            '{"token":"{{Role}}","field":"KT_Onboarding__c.Role__c"},' +
-            '{"token":"{{Domain}}","value":"' + domain.escapeCsv() + '"}]';
+        templateRecord.Merge_Field_Map__c = JSON.serialize(new List<Object>{
+            new Map<String, String>{ 'token' => '{{Name}}', 'fieldPath' => 'Name' },
+            new Map<String, String>{ 'token' => '{{Candidate_Name__c}}', 'fieldPath' => 'Candidate_Name__c' },
+            new Map<String, String>{ 'token' => '{{Start_Date__c}}', 'fieldPath' => 'Start_Date__c' },
+            new Map<String, String>{ 'token' => '{{Role__c}}', 'fieldPath' => 'Role__c' },
+            new Map<String, String>{ 'token' => '{{Department__c}}', 'fieldPath' => 'Department__c' },
+            new Map<String, String>{ 'token' => '{{Work_Location__c}}', 'fieldPath' => 'Work_Location__c' },
+            new Map<String, String>{ 'token' => '{{Hiring_Manager__r.Name}}', 'fieldPath' => 'Hiring_Manager__r.Name' },
+            new Map<String, String>{ 'token' => '{{TODAY}}', 'fieldPath' => 'TODAY' }
+        });
 
         if (contentDocumentIds.containsKey(templateName)) {
             templateRecord.Template_Binary__c = contentDocumentIds.get(templateName);

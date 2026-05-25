@@ -1,3 +1,4 @@
+
 # KT B4 Single Record Functional Test Guide
 
 Use this guide to test the B4 document functionality from one onboarding record, using the deployed Lightning record pages and the KT B4 app tabs.
@@ -52,7 +53,13 @@ If you want one clean demo path, start with `ONB-000109`. Use `ONB-000107` only 
 1. Open the `KT Onboardings` tab.
 2. Open `ONB-000109`.
 3. Confirm the record page loads the B4 workspace.
-4. In the left or sidebar area, confirm standard record information and related lists are visible.
+4. In the Details area, confirm these onboarding merge fields are populated:
+   - Candidate Name
+   - Role
+   - Department
+   - Start Date
+   - Work Location
+   - Hiring Manager
 5. In the main area, confirm these LWCs are present:
    - Document checklist/request list
    - Document upload
@@ -74,6 +81,31 @@ If you want one clean demo path, start with `ONB-000109`. Use `ONB-000107` only 
    - Confirm status, signature status, OCR status, version, and document type are visible.
 
 Expected result: the onboarding record page works as a single command center for checklist, upload, vault portal, and vault operations.
+
+## Test 1A: Template Body And Merge Testing
+
+Use this test to confirm selected templates generate document-specific body text.
+
+1. Open `ONB-000109`.
+2. Confirm the onboarding fields show realistic values. Current test values:
+   - Candidate Name: `Chethan Kumar`
+   - Role: `Manufacturing Operations Specialist`
+   - Department: `Manufacturing Operations`
+   - Work Location: `Bengaluru Plant 01`
+3. Open **01 Checklist Upload** or use the checklist LWC on the onboarding record.
+4. Select or generate from `Manufacturing - Offer Letter 01`.
+5. Confirm the generated file contains a styled **OFFER LETTER** body with a dark header, centered title, metadata panel, candidate, role, start date, department, work location, onboarding number, generated date, hiring manager, and signature section.
+6. Select or generate from `Healthcare - Compliance Acknowledgment 03`.
+7. Confirm the generated file contains a styled **HIPAA CONFIDENTIALITY AND PRIVACY AGREEMENT** body, not generic JSON/template mapping text.
+8. Open the generated vault entries from the onboarding vault section.
+9. Download or preview the generated files.
+
+Verified generated examples:
+
+- HIPAA-style generated vault: `a02g5000008Di3RAAS`
+- Offer-letter generated vault: `a02g5000008Di3SAAS`
+
+Expected result: selecting a document template generates body text appropriate to that document type, and merge fields resolve from the onboarding record.
 
 ## Test 2: Document Vault Record Page And Signing
 
@@ -177,6 +209,9 @@ The app tabs can be tested directly with IDs:
 Mark the single-record test passed only when:
 
 - Onboarding page shows checklist, upload, vault portal, and vault operations.
+- Onboarding merge fields are visible and populated.
+- Offer Letter template generates offer-letter body text.
+- HIPAA/compliance template generates HIPAA agreement body text.
 - A valid file upload creates or updates a vault entry.
 - Vault record page shows the e-signature configuration LWC.
 - Signing workflow creates signature request and signer records.
@@ -185,4 +220,3 @@ Mark the single-record test passed only when:
 - OCR review page loads and can apply selected extracted fields.
 - Bulk monitor page loads and shows job progress.
 - Details and Related tabs show supporting fields, related records, and Files where configured.
-

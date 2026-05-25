@@ -10,8 +10,28 @@
                 <behavior>Readonly</behavior>
                 <field>Name</field>
             </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Candidate_Name__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Role__c</field>
+            </layoutItems>
         </layoutColumns>
         <layoutColumns>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Start_Date__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Department__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Work_Location__c</field>
+            </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
                 <field>Hiring_Manager__c</field>
@@ -49,6 +69,9 @@
     </layoutSections>
     <miniLayout>
         <fields>Name</fields>
+        <fields>Candidate_Name__c</fields>
+        <fields>Role__c</fields>
+        <fields>Start_Date__c</fields>
         <fields>Hiring_Manager__c</fields>
     </miniLayout>
     <relatedLists>

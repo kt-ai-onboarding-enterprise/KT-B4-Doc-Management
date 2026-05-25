@@ -216,7 +216,179 @@ public with sharing class KT_DocumentGeneratorService {
                 }
             }
         }
-        return template.Merge_Field_Map__c;
+        String configuredBody = extractConfiguredTemplateBody(template.Merge_Field_Map__c);
+        if (!String.isBlank(configuredBody)) {
+            return configuredBody;
+        }
+        return buildDefaultTemplateBody(template);
+    }
+
+    private static String extractConfiguredTemplateBody(String source) {
+        if (String.isBlank(source)) {
+            return null;
+        }
+
+        Object parsed;
+        try {
+            parsed = JSON.deserializeUntyped(source);
+        } catch (Exception ignored) {
+            parsed = null;
+        }
+
+        if (parsed instanceof Map<String, Object>) {
+            Map<String, Object> values = (Map<String, Object>) parsed;
+            for (String key : new List<String>{ 'body', 'templateBody', 'content', 'documentBody' }) {
+                if (values.containsKey(key) && values.get(key) != null && !String.isBlank(String.valueOf(values.get(key)))) {
+                    return String.valueOf(values.get(key));
+                }
+            }
+            return null;
+        }
+        if (parsed instanceof List<Object>) {
+            return null;
+        }
+        return source;
+    }
+
+    private static String buildDefaultTemplateBody(KT_DocumentTemplate__c template) {
+        String documentType = inferDocumentType(template);
+        if (documentType == 'Offer Letter') {
+            return buildOfferLetterBody(template);
+        }
+        if (documentType == 'HIPAA Agreement') {
+            return buildHipaaAgreementBody(template);
+        }
+        if (documentType == 'Mutual NDA') {
+            return buildNdaBody(template);
+        }
+        if (documentType == 'Background Check Consent') {
+            return buildBackgroundConsentBody(template);
+        }
+        if (documentType == 'Equipment Agreement') {
+            return buildEquipmentAgreementBody(template);
+        }
+        if (documentType == 'Policy Acknowledgment') {
+            return buildPolicyAcknowledgmentBody(template);
+        }
+        return buildGenericOnboardingBody(template, documentType);
+    }
+
+    private static String inferDocumentType(KT_DocumentTemplate__c template) {
+        String templateName = (template.Template_Name__c == null ? '' : template.Template_Name__c).toLowerCase();
+        String framework = (template.Regulatory_Framework__c == null ? '' : template.Regulatory_Framework__c).toLowerCase();
+        if (templateName.contains('offer letter')) {
+            return 'Offer Letter';
+        }
+        if (templateName.contains('hipaa')) {
+            return 'HIPAA Agreement';
+        }
+        if (templateName.contains('nda')) {
+            return 'Mutual NDA';
+        }
+        if (templateName.contains('background check')) {
+            return 'Background Check Consent';
+        }
+        if (templateName.contains('equipment')) {
+            return 'Equipment Agreement';
+        }
+        if (templateName.contains('policy')) {
+            return 'Policy Acknowledgment';
+        }
+        if (templateName.contains('training certificate')) {
+            return 'Training Certificate';
+        }
+        if (templateName.contains('safety')) {
+            return 'Safety Certification';
+        }
+        if (templateName.contains('data privacy')) {
+            return 'Data Privacy Notice';
+        }
+        if (framework.contains('hipaa') && templateName.contains('compliance')) {
+            return 'HIPAA Agreement';
+        }
+        return String.isBlank(template.Template_Name__c) ? 'Onboarding Document' : template.Template_Name__c;
+    }
+
+    private static String buildCommonHeader(KT_DocumentTemplate__c template, String title) {
+        return title + '\n'
+            + 'Template: ' + safeTemplateName(template) + '\n'
+            + 'Generated Date: {{TODAY}}\n'
+            + 'Onboarding Record: {{Name}}\n'
+            + 'Candidate: {{Candidate_Name__c}}\n'
+            + 'Role: {{Role__c}}\n'
+            + 'Department: {{Department__c}}\n'
+            + 'Start Date: {{Start_Date__c}}\n'
+            + 'Work Location: {{Work_Location__c}}\n'
+            + 'Hiring Manager: {{Hiring_Manager__r.Name}}\n\n';
+    }
+
+    private static String buildOfferLetterBody(KT_DocumentTemplate__c template) {
+        return buildCommonHeader(template, 'OFFER LETTER')
+            + 'Dear {{Candidate_Name__c}},\n\n'
+            + 'We are pleased to offer you the role of {{Role__c}} with a planned start date of {{Start_Date__c}}. '
+            + 'This offer is associated with onboarding record {{Name}} and will be administered by {{Hiring_Manager__r.Name}}.\n\n'
+            + 'Your primary department will be {{Department__c}}, and your expected work location will be {{Work_Location__c}}. '
+            + 'This offer is contingent upon completion of required onboarding documents, policy acknowledgments, and any required background or compliance checks.\n\n'
+            + 'Please review this letter carefully. By signing, you acknowledge the offered role, start date, and onboarding requirements.\n\n'
+            + 'Candidate Signature: ______________________________\n'
+            + 'Date: ______________________________\n';
+    }
+
+    private static String buildHipaaAgreementBody(KT_DocumentTemplate__c template) {
+        return buildCommonHeader(template, 'HIPAA CONFIDENTIALITY AND PRIVACY AGREEMENT')
+            + 'This agreement applies to {{Candidate_Name__c}} in connection with onboarding record {{Name}}. '
+            + 'The candidate may access protected health information only for assigned job duties and only according to company policy, HIPAA requirements, and applicable privacy safeguards.\n\n'
+            + 'The candidate agrees to protect patient information, avoid unauthorized disclosure, report suspected privacy incidents promptly, and complete required privacy and security training. '
+            + 'Access to systems and records must be limited to the minimum necessary information needed to perform the assigned role of {{Role__c}}.\n\n'
+            + 'Violation of this agreement may result in disciplinary action, removal of access, termination, and any required regulatory reporting.\n\n'
+            + 'Candidate Signature: ______________________________\n'
+            + 'Date: ______________________________\n';
+    }
+
+    private static String buildNdaBody(KT_DocumentTemplate__c template) {
+        return buildCommonHeader(template, 'MUTUAL NON-DISCLOSURE AGREEMENT')
+            + 'The parties may exchange confidential business, technical, employee, client, or operational information during onboarding and employment activities. '
+            + '{{Candidate_Name__c}} agrees to use confidential information only for authorized business purposes and to protect it from unauthorized access or disclosure.\n\n'
+            + 'This obligation continues after the onboarding process unless the information becomes public through no fault of the recipient or disclosure is required by law.\n\n'
+            + 'Candidate Signature: ______________________________\n'
+            + 'Date: ______________________________\n';
+    }
+
+    private static String buildBackgroundConsentBody(KT_DocumentTemplate__c template) {
+        return buildCommonHeader(template, 'BACKGROUND CHECK CONSENT')
+            + '{{Candidate_Name__c}} authorizes the company or its approved vendor to perform background screening for the {{Role__c}} onboarding process. '
+            + 'The review may include identity verification, employment verification, education verification, and legally permitted checks relevant to the role.\n\n'
+            + 'The candidate confirms that information provided during onboarding is accurate and understands that consent may be withdrawn according to applicable law.\n\n'
+            + 'Candidate Signature: ______________________________\n'
+            + 'Date: ______________________________\n';
+    }
+
+    private static String buildEquipmentAgreementBody(KT_DocumentTemplate__c template) {
+        return buildCommonHeader(template, 'EQUIPMENT AGREEMENT')
+            + '{{Candidate_Name__c}} acknowledges receipt of company equipment or access resources for the {{Role__c}} role. '
+            + 'Equipment must be used for authorized business purposes, protected from loss or misuse, and returned when requested or at the end of assignment.\n\n'
+            + 'Candidate Signature: ______________________________\n'
+            + 'Date: ______________________________\n';
+    }
+
+    private static String buildPolicyAcknowledgmentBody(KT_DocumentTemplate__c template) {
+        return buildCommonHeader(template, 'POLICY ACKNOWLEDGMENT')
+            + '{{Candidate_Name__c}} acknowledges receipt of applicable company policies for the {{Role__c}} role and agrees to follow all assigned onboarding, compliance, security, safety, and conduct requirements.\n\n'
+            + 'Candidate Signature: ______________________________\n'
+            + 'Date: ______________________________\n';
+    }
+
+    private static String buildGenericOnboardingBody(KT_DocumentTemplate__c template, String documentType) {
+        return buildCommonHeader(template, String.valueOf(documentType).toUpperCase())
+            + 'This document supports the onboarding process for {{Candidate_Name__c}}. '
+            + 'It is generated from the selected B4 template and merged with the current KT Onboarding record data.\n\n'
+            + 'The candidate and responsible teams should review the document details, complete any required acknowledgments, and retain the generated file in the document vault.\n\n'
+            + 'Acknowledgment Signature: ______________________________\n'
+            + 'Date: ______________________________\n';
+    }
+
+    private static String safeTemplateName(KT_DocumentTemplate__c template) {
+        return String.isBlank(template.Template_Name__c) ? 'Selected Template' : template.Template_Name__c;
     }
 
     private static String getOutputExtension(String outputFormat) {
@@ -236,18 +408,15 @@ public with sharing class KT_DocumentGeneratorService {
     }
 
     private static String renderSimplePdf(String source) {
-        List<String> pdfLines = buildPdfLines(source);
-        String contentStream = 'BT\n/F1 11 Tf\n14 TL\n50 742 Td\n';
-        for (String line : pdfLines) {
-            contentStream += '(' + escapePdfText(line) + ') Tj\nT*\n';
-        }
-        contentStream += 'ET\n';
+        PdfSections sections = parsePdfSections(source);
+        String contentStream = buildProfessionalPdfContent(sections);
 
         List<String> objects = new List<String>{
             '<< /Type /Catalog /Pages 2 0 R >>',
             '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
-            '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>',
+            '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>',
             '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+            '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>',
             '<< /Length ' + contentStream.length() + ' >>\nstream\n' + contentStream + 'endstream'
         };
 
@@ -269,36 +438,124 @@ public with sharing class KT_DocumentGeneratorService {
         return pdf;
     }
 
-    private static List<String> buildPdfLines(String source) {
-        String normalized = String.isBlank(source) ? '' : source.replace('\r\n', '\n').replace('\r', '\n');
-        List<String> lines = new List<String>();
-        for (String rawLine : normalized.split('\n')) {
-            addWrappedPdfLine(lines, rawLine);
-            if (lines.size() >= 52) {
-                break;
+    private class PdfSections {
+        String title;
+        List<String> metaLines = new List<String>();
+        List<String> bodyLines = new List<String>();
+    }
+
+    private static PdfSections parsePdfSections(String source) {
+        PdfSections sections = new PdfSections();
+        String normalized = String.isBlank(source) ? 'Generated Document' : source.replace('\r\n', '\n').replace('\r', '\n');
+        List<String> lines = normalized.split('\n');
+        sections.title = lines.isEmpty() || String.isBlank(lines[0]) ? 'Generated Document' : lines[0].trim();
+
+        Boolean inBody = false;
+        for (Integer index = 1; index < lines.size(); index++) {
+            String line = lines[index] == null ? '' : lines[index].trim();
+            if (!inBody && String.isBlank(line)) {
+                inBody = true;
+                continue;
+            }
+            if (inBody) {
+                sections.bodyLines.add(line);
+            } else {
+                sections.metaLines.add(line);
             }
         }
-        if (lines.isEmpty()) {
-            lines.add('');
+        return sections;
+    }
+
+    private static String buildProfessionalPdfContent(PdfSections sections) {
+        String stream = '';
+        stream += 'q\n0.12 0.25 0.40 rg\n0 735 612 42 re f\nQ\n';
+        stream += 'q\n0.78 0.84 0.90 rg\n0 726 612 5 re f\nQ\n';
+        stream += 'q\n0.96 0.98 1.00 rg\n48 562 516 98 re f\nQ\n';
+        stream += 'q\n0.86 0.90 0.95 RG\n48 562 516 98 re S\nQ\n';
+        stream += 'q\n0.88 0.88 0.88 RG\n72 124 468 1 re f\nQ\n';
+
+        stream += writeText('KT B4 DOCUMENT OPERATIONS', 54, 752, 8, 'F2', '1 1 1');
+        stream += writeText('CONFIDENTIAL', 500, 752, 8, 'F2', '1 1 1');
+
+        Integer titleX = Math.max(64, 306 - (sections.title.length() * 4));
+        stream += writeText(sections.title, titleX, 694, 16, 'F2', '0.10 0.13 0.18');
+        stream += 'q\n0.12 0.25 0.40 rg\n250 678 112 2 re f\nQ\n';
+
+        Integer metaY = 638;
+        Integer metaIndex = 0;
+        for (String metaLine : sections.metaLines) {
+            if (String.isBlank(metaLine) || metaIndex >= 8) {
+                continue;
+            }
+            List<String> parts = splitLabelValue(metaLine);
+            Integer x = Math.mod(metaIndex, 2) == 0 ? 64 : 318;
+            Integer y = metaY - (Math.floor(metaIndex / 2).intValue() * 20);
+            stream += writeText(parts[0].toUpperCase(), x, y, 7, 'F2', '0.35 0.42 0.52');
+            stream += writeText(parts[1], x, y - 10, 9, 'F1', '0.10 0.13 0.18');
+            metaIndex++;
+        }
+
+        Integer bodyY = 522;
+        for (String rawLine : sections.bodyLines) {
+            if (bodyY < 178) {
+                break;
+            }
+            if (String.isBlank(rawLine)) {
+                bodyY -= 13;
+                continue;
+            }
+            if (rawLine.contains('Signature:') || rawLine == 'Date:' || rawLine.startsWith('Date: ')) {
+                continue;
+            }
+            for (String wrappedLine : wrapWords(rawLine, 92)) {
+                if (bodyY < 178) {
+                    break;
+                }
+                stream += writeText(wrappedLine, 72, bodyY, 9, 'F1', '0.16 0.18 0.22');
+                bodyY -= 13;
+            }
+            bodyY -= 5;
+        }
+
+        stream += writeText('Acceptance and Signature', 228, 104, 10, 'F2', '0.10 0.13 0.18');
+        stream += writeText('Candidate Signature', 84, 78, 8, 'F2', '0.35 0.42 0.52');
+        stream += writeText('Date', 386, 78, 8, 'F2', '0.35 0.42 0.52');
+        stream += 'q\n0.10 0.13 0.18 RG\n84 68 230 1 re S\n386 68 142 1 re S\nQ\n';
+        stream += writeText('Generated by KT B4 Document Operations', 72, 38, 7, 'F1', '0.45 0.50 0.58');
+        return stream;
+    }
+
+    private static List<String> splitLabelValue(String line) {
+        Integer separatorIndex = line == null ? -1 : line.indexOf(':');
+        if (separatorIndex <= 0) {
+            return new List<String>{ 'Detail', line == null ? '' : line };
+        }
+        return new List<String>{
+            line.substring(0, separatorIndex),
+            separatorIndex + 1 >= line.length() ? '' : line.substring(separatorIndex + 1).trim()
+        };
+    }
+
+    private static List<String> wrapWords(String source, Integer maxLength) {
+        List<String> lines = new List<String>();
+        String remaining = source == null ? '' : source.replace('\t', ' ').trim();
+        while (remaining.length() > maxLength) {
+            Integer breakIndex = remaining.lastIndexOf(' ', maxLength);
+            if (breakIndex <= 0) {
+                breakIndex = maxLength;
+            }
+            lines.add(remaining.substring(0, breakIndex).trim());
+            remaining = remaining.substring(breakIndex).trim();
+        }
+        if (!String.isBlank(remaining)) {
+            lines.add(remaining);
         }
         return lines;
     }
 
-    private static void addWrappedPdfLine(List<String> lines, String rawLine) {
-        final Integer maxLineLength = 90;
-        String remaining = rawLine == null ? '' : rawLine.replace('\t', ' ');
-        if (remaining.length() == 0) {
-            lines.add('');
-            return;
-        }
-
-        while (remaining.length() > maxLineLength && lines.size() < 52) {
-            lines.add(remaining.substring(0, maxLineLength));
-            remaining = remaining.substring(maxLineLength);
-        }
-        if (lines.size() < 52) {
-            lines.add(remaining);
-        }
+    private static String writeText(String value, Integer x, Integer y, Integer size, String fontName, String rgb) {
+        return 'BT\n' + rgb + ' rg\n/' + fontName + ' ' + String.valueOf(size) + ' Tf\n'
+            + String.valueOf(x) + ' ' + String.valueOf(y) + ' Td\n(' + escapePdfText(value) + ') Tj\nET\n';
     }
 
     private static String escapePdfText(String value) {

@@ -31,6 +31,8 @@ This file records tracker tasks completed by Codex during autonomous development
 | B4 Final Regression Validation | Completed | Test run `707g500000OtEiI`, 121/121 passed, org-wide coverage 86% |
 | B4 Professional LWC UI Upgrade | Completed | Deploys `0Afg5000008La8lCAC`, `0Afg5000008Lq73CAC`; all nine B4 LWC bundles upgraded and compiled |
 | B4 Record Page LWC Placement | Completed | Deploy `0Afg5000008LXVrCAO`; assigned B4 record pages for Onboarding, Document Vault, OCR Job, and Bulk Document Job; added URL context support for app tabs; `docs/uat/KT_B4_Single_Record_Functional_Test_Guide.md` |
+| B4 Template Body Merge Generation | Completed | Deploys `0Afg5000008m1QECAY`, `0Afg5000008lfxbCAA`, `0Afg5000008lcN1CAI`; tests `707g500000Q0ClP` 6/6 passed; reseeded 205 templates; verified HIPAA vault `a02g5000008Dh2XAAS` and Offer Letter vault `a02g5000008Dh2YAAS` |
+| B4 Professional PDF Renderer | Completed | Deploy `0Afg5000008lk63CAA`; tests `707g500000Q0Af9` 6/6 passed; generated styled HIPAA vault `a02g5000008Di3RAAS` and styled Offer Letter vault `a02g5000008Di3SAAS` |
 
 ## Deferred Items
 

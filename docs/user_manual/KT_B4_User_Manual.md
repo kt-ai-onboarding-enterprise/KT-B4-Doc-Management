@@ -88,6 +88,21 @@ Document generation uses `KT_DocumentTemplate__c` and template configuration met
 
 The baseline template library is loaded from `scripts/apex/KT_B4_TemplateLibrarySeed.apex`. It creates 205 active templates across healthcare, manufacturing, retail, finance, technology, government/public sector, construction, and generic onboarding.
 
+If a template has an approved DOCX/PDF file in `Template_Binary__c`, generation uses that uploaded template body. If no binary template is attached, B4 now creates a document-specific default body from the selected template type. For example, Offer Letter templates generate offer-letter language, and HIPAA/compliance healthcare templates generate HIPAA confidentiality and privacy agreement language.
+
+Fallback-generated PDFs are styled for demos with a branded header bar, centered document title, metadata panel, wrapped body content, and signature area.
+
+Generated bodies merge from `KT_Onboarding__c`, including:
+
+- Onboarding Number
+- Candidate Name
+- Role
+- Department
+- Start Date
+- Work Location
+- Hiring Manager
+- Generated Date
+
 The current preview experience is the `ktDocumentPreview` LWC. The React/Vibes 2.0 preview player is a deferred Sprint 9 beta item until the Vibes runtime is available.
 
 Use this area to:
@@ -97,7 +112,7 @@ Use this area to:
 - Store the generated file in the vault.
 - Link the generated document back to the request.
 
-Template records are ready for checklist selection after load. For real document generation, confirm `Template_Binary__c` contains the approved Salesforce File `ContentDocumentId` for the DOCX or PDF template.
+Template records are ready for checklist selection after load. For production-approved legal language, attach the approved Salesforce File `ContentDocumentId` to `Template_Binary__c`; otherwise the fallback body is intended for functional testing and demo flows.
 
 Admins maintain template fields with the `KT_Admin` permission set. HR users and compliance users can read template configuration through their B4 permission sets.
 

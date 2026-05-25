@@ -1,7 +1,14 @@
 @IsTest
 private class KT_DocumentGeneratorServiceTest {
     private static KT_Onboarding__c createOnboarding() {
-        KT_Onboarding__c onboarding = new KT_Onboarding__c();
+        KT_Onboarding__c onboarding = new KT_Onboarding__c(
+            Candidate_Name__c = 'Asha Raman',
+            Role__c = 'Clinical Analyst',
+            Department__c = 'Care Operations',
+            Work_Location__c = 'Bengaluru',
+            Start_Date__c = Date.today().addDays(14),
+            Hiring_Manager__c = UserInfo.getUserId()
+        );
         insert onboarding;
         return onboarding;
     }
@@ -119,6 +126,37 @@ private class KT_DocumentGeneratorServiceTest {
         System.assertEquals('Complete', updatedRequest.Status__c);
         System.assertEquals(result.vaultEntryId, updatedRequest.Document_Vault_Entry__c);
         System.assertNotEquals(null, updatedRequest.Completed_Date__c);
+    }
+
+    @IsTest
+    static void generatesDocumentSpecificFallbackBodyWhenTemplateFileIsMissing() {
+        KT_Onboarding__c onboarding = createOnboarding();
+        KT_DocumentTemplate__c template = new KT_DocumentTemplate__c(
+            Template_Name__c = 'Healthcare - HIPAA Agreement',
+            Output_Format__c = 'PDF',
+            Merge_Field_Map__c = '{"{{Candidate_Name__c}}":"Candidate_Name__c","{{Role__c}}":"Role__c"}',
+            Requires_Signature__c = true,
+            Is_Active__c = true,
+            Version__c = 1,
+            Regulatory_Framework__c = 'HIPAA'
+        );
+        insert template;
+
+        Test.startTest();
+        KT_DocumentGeneratorService.KT_DocGenResult result =
+            KT_DocumentGeneratorService.generateDocument(onboarding.Id, template.Id);
+        Test.stopTest();
+
+        ContentVersion generatedVersion = [
+            SELECT VersionData
+            FROM ContentVersion
+            WHERE Id = :result.contentVersionId
+        ];
+        String generatedBody = generatedVersion.VersionData.toString();
+        System.assert(generatedBody.contains('HIPAA CONFIDENTIALITY AND PRIVACY AGREEMENT'));
+        System.assert(generatedBody.contains('Asha Raman'));
+        System.assert(generatedBody.contains('Clinical Analyst'));
+        System.assert(generatedBody.contains('Care Operations'));
     }
 
     @IsTest

@@ -185,6 +185,11 @@
         <field>KT_DocumentTemplate__c.Version__c</field>
         <readable>true</readable>
     </fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Onboarding__c.Candidate_Name__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Onboarding__c.Department__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Onboarding__c.Role__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Onboarding__c.Start_Date__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>true</editable><field>KT_Onboarding__c.Work_Location__c</field><readable>true</readable></fieldPermissions>
     <hasActivationRequired>false</hasActivationRequired>
     <label>KT HR User</label>
     <objectPermissions>
