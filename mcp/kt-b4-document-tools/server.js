@@ -131,6 +131,52 @@ const getDocumentVaultTool = {
   }
 };
 
+const verifyDocumentTool = {
+  name: 'kt_verify_document',
+  description:
+    'Verify a B4 document request, vault entry, or signature request and return its completion, file, OCR, and signing evidence.',
+  inputSchema: {
+    type: 'object',
+    additionalProperties: false,
+    properties: {
+      onboardingId: {
+        type: 'string',
+        description: 'Optional Salesforce Id of the KT_Onboarding__c record.'
+      },
+      documentRequestId: {
+        type: 'string',
+        description: 'Optional Salesforce Id of the KT_Document_Request__c row to verify.'
+      },
+      vaultEntryId: {
+        type: 'string',
+        description: 'Optional Salesforce Id of the KT_DocumentVault__c row to verify.'
+      },
+      signatureRequestId: {
+        type: 'string',
+        description: 'Optional Salesforce Id of the KT_Signature_Request__c row to verify.'
+      },
+      requireFile: {
+        type: 'boolean',
+        default: true
+      },
+      requireCompletedStatus: {
+        type: 'boolean',
+        default: false
+      },
+      requireFullySigned: {
+        type: 'boolean',
+        default: false
+      }
+    },
+    anyOf: [
+      { required: ['documentRequestId'] },
+      { required: ['vaultEntryId'] },
+      { required: ['signatureRequestId'] },
+      { required: ['onboardingId'] }
+    ]
+  }
+};
+
 const dispatchSigningTool = {
   name: 'kt_dispatch_signing',
   description:
@@ -229,7 +275,7 @@ async function handleLine(line) {
 
     if (request.method === 'tools/list') {
       writeResult(request.id, {
-        tools: [requestDocumentTool, uploadDocumentTool, getDocumentVaultTool, dispatchSigningTool]
+        tools: [requestDocumentTool, uploadDocumentTool, verifyDocumentTool, getDocumentVaultTool, dispatchSigningTool]
       });
       return;
     }
@@ -254,6 +300,14 @@ async function handleLine(line) {
       }
       if (toolName === 'kt_get_document_vault') {
         const result = await ktGetDocumentVault(request.params?.arguments || {});
+        writeResult(request.id, {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+          structuredContent: result
+        });
+        return;
+      }
+      if (toolName === 'kt_verify_document') {
+        const result = await ktVerifyDocument(request.params?.arguments || {});
         writeResult(request.id, {
           content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
           structuredContent: result
@@ -469,6 +523,75 @@ async function ktGetDocumentVault(args) {
   };
 }
 
+async function ktVerifyDocument(args) {
+  ensureSalesforceConfig();
+  const hasScope = args.documentRequestId || args.vaultEntryId || args.signatureRequestId || args.onboardingId;
+  if (!hasScope) {
+    throw new Error('One of documentRequestId, vaultEntryId, signatureRequestId, or onboardingId is required.');
+  }
+  if (args.documentRequestId) {
+    validateSalesforceId(args.documentRequestId, 'documentRequestId');
+  }
+  if (args.vaultEntryId) {
+    validateSalesforceId(args.vaultEntryId, 'vaultEntryId');
+  }
+  if (args.signatureRequestId) {
+    validateSalesforceId(args.signatureRequestId, 'signatureRequestId');
+  }
+  if (args.onboardingId) {
+    validateSalesforceId(args.onboardingId, 'onboardingId');
+  }
+
+  const requestRecords = await queryDocumentRequests(args);
+  const vaultRecords = await queryVaultEntries(args, requestRecords);
+  const signatureRecords = await querySignatureRequests(args, vaultRecords);
+  const signerRecords = await querySigners(signatureRecords);
+  const auditRecords = await querySignatureAudits(signatureRecords);
+
+  const fileEvidence = vaultRecords.map((entry) => ({
+    vaultEntryId: entry.Id,
+    documentName: entry.Document_Name__c,
+    contentDocumentId: entry.Content_Document_Id__c || null,
+    hasFile: Boolean(entry.Content_Document_Id__c),
+    versionNumber: entry.Version_Number__c || null
+  }));
+
+  const requirementResults = {
+    hasDocumentRequest: requestRecords.length > 0 || !args.documentRequestId,
+    hasVaultEntry: vaultRecords.length > 0,
+    hasRequiredFile: args.requireFile === false || fileEvidence.some((entry) => entry.hasFile),
+    hasCompletedStatus:
+      args.requireCompletedStatus !== true ||
+      requestRecords.some((record) => record.Status__c === 'Complete') ||
+      vaultRecords.some((record) => ['Complete', 'Signed'].includes(record.Status__c)),
+    hasFullySigned:
+      args.requireFullySigned !== true ||
+      signatureRecords.some((record) => record.Status__c === 'Fully Signed' || record.Completed_Signers__c === record.Total_Signers__c)
+  };
+
+  const verified = Object.values(requirementResults).every(Boolean);
+  return {
+    success: true,
+    verified,
+    requirementResults,
+    onboardingId: args.onboardingId || firstValue([...requestRecords, ...vaultRecords, ...signatureRecords], 'KT_Onboarding__c'),
+    counts: {
+      documentRequests: requestRecords.length,
+      vaultEntries: vaultRecords.length,
+      signatureRequests: signatureRecords.length,
+      signers: signerRecords.length,
+      signatureAudits: auditRecords.length
+    },
+    documentRequests: requestRecords.map(stripAttributes),
+    vaultEntries: vaultRecords.map(stripAttributes),
+    signatureRequests: signatureRecords.map(stripAttributes),
+    signers: signerRecords.map(stripAttributes),
+    signatureAudits: auditRecords.map(stripAttributes),
+    fileEvidence,
+    message: verified ? 'Document verification passed.' : 'Document verification found missing or incomplete evidence.'
+  };
+}
+
 async function ktDispatchSigning(args) {
   ensureSalesforceConfig();
   validateSalesforceId(args.vaultEntryId, 'vaultEntryId');
@@ -534,6 +657,110 @@ async function ktDispatchSigning(args) {
     signingOrder,
     signerIds
   };
+}
+
+async function queryDocumentRequests(args) {
+  const filters = [];
+  if (args.documentRequestId) {
+    filters.push(`Id = '${args.documentRequestId}'`);
+  }
+  if (args.onboardingId) {
+    filters.push(`KT_Onboarding__c = '${args.onboardingId}'`);
+  }
+  if (args.vaultEntryId) {
+    filters.push(`Document_Vault_Entry__c = '${args.vaultEntryId}'`);
+  }
+  if (filters.length === 0) {
+    return [];
+  }
+  const query = [
+    'SELECT Id, KT_Onboarding__c, Document_Template__c, Document_Vault_Entry__c,',
+    'Status__c, Document_Direction__c, Is_Required__c, Due_Date__c, Completed_Date__c, Reminder_Count__c',
+    `FROM KT_Document_Request__c WHERE ${filters.join(' AND ')}`,
+    'ORDER BY CreatedDate ASC'
+  ].join(' ');
+  return (await salesforceFetch('/query?q=' + encodeURIComponent(query), { method: 'GET' })).records || [];
+}
+
+async function queryVaultEntries(args, requestRecords) {
+  const filters = [];
+  if (args.vaultEntryId) {
+    filters.push(`Id = '${args.vaultEntryId}'`);
+  }
+  if (args.onboardingId) {
+    filters.push(`KT_Onboarding__c = '${args.onboardingId}'`);
+  }
+  const requestIds = requestRecords.map((record) => record.Id);
+  const requestVaultIds = requestRecords.map((record) => record.Document_Vault_Entry__c).filter(Boolean);
+  if (requestIds.length > 0) {
+    filters.push(`Document_Request__c IN (${quoteIds(requestIds)})`);
+  }
+  if (requestVaultIds.length > 0) {
+    filters.push(`Id IN (${quoteIds(requestVaultIds)})`);
+  }
+  if (filters.length === 0) {
+    return [];
+  }
+  const query = [
+    'SELECT Id, KT_Onboarding__c, Document_Request__c, Document_Name__c, Content_Document_Id__c,',
+    'Document_Type__c, Status__c, OCR_Status__c, Signature_Status__c, Version_Number__c,',
+    'Regulatory_Tag__c, Upload_Timestamp__c, Expiry_Date__c',
+    `FROM KT_DocumentVault__c WHERE ${filters.join(' OR ')}`,
+    'ORDER BY CreatedDate ASC'
+  ].join(' ');
+  return (await salesforceFetch('/query?q=' + encodeURIComponent(query), { method: 'GET' })).records || [];
+}
+
+async function querySignatureRequests(args, vaultRecords) {
+  const filters = [];
+  if (args.signatureRequestId) {
+    filters.push(`Id = '${args.signatureRequestId}'`);
+  }
+  if (args.onboardingId) {
+    filters.push(`KT_Onboarding__c = '${args.onboardingId}'`);
+  }
+  const vaultIds = vaultRecords.map((record) => record.Id);
+  if (vaultIds.length > 0) {
+    filters.push(`KT_DocumentVault__c IN (${quoteIds(vaultIds)})`);
+  }
+  if (filters.length === 0) {
+    return [];
+  }
+  const query = [
+    'SELECT Id, KT_Onboarding__c, KT_DocumentVault__c, Signing_Provider__c, Status__c,',
+    'Signing_Order__c, Total_Signers__c, Completed_Signers__c, Expiry_Date__c,',
+    'External_Envelope_Id__c, Completed_Document_Id__c, Trusted_Agent_Verification_Status__c',
+    `FROM KT_Signature_Request__c WHERE ${filters.join(' OR ')}`,
+    'ORDER BY CreatedDate ASC'
+  ].join(' ');
+  return (await salesforceFetch('/query?q=' + encodeURIComponent(query), { method: 'GET' })).records || [];
+}
+
+async function querySigners(signatureRecords) {
+  const requestIds = signatureRecords.map((record) => record.Id);
+  if (requestIds.length === 0) {
+    return [];
+  }
+  const query = [
+    'SELECT Id, KT_Signature_Request__c, Signer_Name__c, Signer_Email__c, Signer_Role__c,',
+    'Signing_Order__c, Status__c, Signed_At__c',
+    `FROM KT_Signer__c WHERE KT_Signature_Request__c IN (${quoteIds(requestIds)})`,
+    'ORDER BY Signing_Order__c ASC NULLS LAST, CreatedDate ASC'
+  ].join(' ');
+  return (await salesforceFetch('/query?q=' + encodeURIComponent(query), { method: 'GET' })).records || [];
+}
+
+async function querySignatureAudits(signatureRecords) {
+  const requestIds = signatureRecords.map((record) => record.Id);
+  if (requestIds.length === 0) {
+    return [];
+  }
+  const query = [
+    'SELECT Id, KT_Signature_Request__c, Event_Type__c, Event_Timestamp__c, IP_Address__c, Hash_Value__c',
+    `FROM KT_Signature_Audit__c WHERE KT_Signature_Request__c IN (${quoteIds(requestIds)})`,
+    'ORDER BY Event_Timestamp__c ASC NULLS LAST, CreatedDate ASC'
+  ].join(' ');
+  return (await salesforceFetch('/query?q=' + encodeURIComponent(query), { method: 'GET' })).records || [];
 }
 
 async function resolveVaultOnboardingId(vaultEntryId) {
@@ -635,6 +862,15 @@ function groupBy(records, fieldName) {
     groups[key].push(cleanRecord);
     return groups;
   }, {});
+}
+
+function quoteIds(ids) {
+  return ids.map((id) => `'${id}'`).join(',');
+}
+
+function firstValue(records, fieldName) {
+  const record = records.find((item) => item && item[fieldName]);
+  return record ? record[fieldName] : null;
 }
 
 function trimTrailingSlash(value) {
